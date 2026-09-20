@@ -9,7 +9,8 @@ page.
 
 Audience: whoever writes the lessons — you, or anyone you bring in.
 
-Status: **C0 complete.** `lin_reg` is the worked example of the model; C1 is next.
+Status: **C0 and C1 complete.** All six Core ML topics are split; 24 sub-topic lessons
+published, ~176 to go. C2 is next.
 
 ---
 
@@ -18,7 +19,7 @@ Status: **C0 complete.** `lin_reg` is the worked example of the model; C1 is nex
 | | |
 |---|---|
 | Topics | 70 across 12 domains |
-| Topics with a lesson | **6** (all Core ML) |
+| Topics with a lesson | **6** (all Core ML, 24 sub-topics) |
 | Topics with a notebook | 7 |
 | Topics with practice problems | 3 |
 | Typical lesson size | ~750 words, 5 sections |
@@ -212,14 +213,22 @@ summaries, and the minute estimate had to start charging for display maths, whic
 load without being words. The word *limit* still ignores maths on purpose — counting it would
 push authors to write less explanation around their formulas.
 
-### Phase C1 — Migrate the remaining five Core ML topics (3–4 days) ⟵ **start here**
+### Phase C1 — Migrate the Core ML topics ✅ done
 
-`lin_reg` is done. Split the other five into ~20 sub-topics per §2, moving the prose across
-rather than rewriting it, then filling the gaps the split exposes. Delete their bespoke route
-folders and `data/core-lessons.ts` with them; `app/topics/core-lesson.tsx` goes too.
+All six split, 24 sub-topics, each 265–476 words. `data/core-lessons.ts`,
+`app/topics/core-lesson.tsx` and the five bespoke route folders are gone; `/topics/[id]`
+serves all 70 topics and no topic route is hand-written.
 
-**Done when** all six render as maps, all ~24 sub-topic pages pass validation, and no topic
-route is hand-written any more.
+**The split was not a move.** Each topic's five sections held ~750 words; its four lessons
+hold ~1,500. Splitting exposed what the single pages had asserted without explaining — why
+cross-entropy pairs with the sigmoid, why bagging and boosting want opposite base learners,
+why attention is scaled. Budget roughly double the source length for the remaining waves.
+
+**Verified** by an e2e test walking all six original URLs: each returns 200 and renders four
+lesson cards. Old links keep working.
+
+The model held up across five topics written by the rules rather than alongside them, so §3
+and §4 are settled. No further changes were needed.
 
 This phase also settles whether the model is right. Adjust §3 and §4 here if it is not —
 cheaply, before 200 pages depend on them.
@@ -230,7 +239,7 @@ Ordered by what makes the site useful soonest, not by domain size.
 
 | Phase | Domains | Topics | Est. sub-topics |
 |---|---|---|---|
-| C2 | DS & Algo, SWE / Math | 6 | ~20 |
+| C2 ⟵ **next** | DS & Algo, SWE / Math | 6 | ~20 |
 | C3 | GenAI, GPU / Training | 7 | ~24 |
 | C4 | Statistics | 8 | ~26 |
 | C5 | MLOps, Systems | 11 | ~34 |
