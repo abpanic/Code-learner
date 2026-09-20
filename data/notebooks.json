@@ -1,0 +1,9 @@
+[
+  "dl_fnn",
+  "exp_design",
+  "gbms",
+  "lin_reg",
+  "log_reg",
+  "transformers",
+  "trees_rf"
+]

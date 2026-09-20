@@ -1,0 +1,21 @@
+.core-markdown { color: #40566b; font-size: 15px; line-height: 1.73; }
+.core-markdown p { margin: 12px 0; }
+.core-markdown strong { color: #263d50; }
+.core-markdown .katex-display { margin: 20px 0; padding: 15px 10px; border: 1px solid #dce7ec; border-radius: 9px; background: #f4f8fa; overflow-x: auto; overflow-y: hidden; font-size: 1.08em; }
+.core-markdown ol, .core-markdown ul { padding-left: 24px; margin: 16px 0; }
+.core-markdown li { padding-left: 5px; margin: 9px 0; }
+.core-markdown li::marker { color: #267e86; font-weight: 800; }
+.core-markdown a { color: #137483; text-decoration: underline; }
+.core-markdown code { font: .92em var(--font-mono); background: #eef4f6; padding: 2px 4px; border-radius: 3px; }
+.core-markdown pre { overflow-x: auto; padding: 16px; border-radius: 8px; background: #172b40; color: #eef9fa; }
+.core-markdown pre code { background: none; padding: 0; }
+.core-neighbors { display: flex; justify-content: space-between; gap: 14px; margin: 19px 0; }
+.core-neighbors a { display: flex; gap: 12px; align-items: center; width: 48%; min-height: 70px; padding: 13px 16px; border: 1px solid #d5e5e7; border-radius: 10px; background: #fff; color: #24566a; font-size: 13px; font-weight: 720; line-height: 1.35; }
+.core-neighbors a:hover { background: #eaf4f4; }
+.core-neighbors a:last-of-type { margin-left: auto; text-align: right; justify-content: flex-end; }
+.core-neighbors small { display: block; margin-bottom: 3px; color: #728797; font-size: 10px; font-weight: 800; letter-spacing: .09em; }
+.core-sources { margin-top: 22px; border-top: 1px solid #dce5eb; padding-top: 17px; color: #516a7a; font-size: 12px; }
+.core-sources > strong { display: block; margin-bottom: 7px; color: #29485b; }
+.core-sources > div { display: flex; flex-wrap: wrap; gap: 8px 17px; }
+.core-sources a { display: inline-flex; align-items: center; gap: 3px; color: #237484; text-decoration: underline; }
+@media(max-width:520px) { .core-neighbors { flex-direction: column; }.core-neighbors a { width: 100%; }.core-markdown .katex-display { font-size: .9em; } }

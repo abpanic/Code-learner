@@ -1,0 +1,1379 @@
+{
+  "skillsData": [
+    {
+      "id": "lin_reg",
+      "domain": "core_ml",
+      "domainName": "1. Core ML & Deep Learning",
+      "title": "Linear Regression & Regularization",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "ds",
+        "research"
+      ],
+      "desc": "OLS closed-form solution (XᵀX)⁻¹Xᵀy vs Gradient Descent. Ridge (L2), Lasso (L1) feature selection, ElasticNet. Assumptions: Linearity, independence, homoscedasticity, residual normality, VIF multicollinearity.",
+      "formula": "Loss = ||y - Xw||² + λ₁||w||₁ + λ₂||w||₂²",
+      "questions": [
+        "Why does L1 regularization cause sparse weights while L2 only shrinks them?",
+        "What happens to the OLS solution when features are perfectly collinear?",
+        "How do you detect and treat heteroscedasticity in residual plots?"
+      ]
+    },
+    {
+      "id": "log_reg",
+      "domain": "core_ml",
+      "domainName": "1. Core ML & Deep Learning",
+      "title": "Logistic Regression & BCE Loss",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "ds"
+      ],
+      "desc": "Sigmoid activation mapping linear combinations to probabilities. Derivation of Log-Loss / Binary Cross-Entropy (BCE) using Maximum Likelihood Estimation (MLE). One-vs-Rest & Softmax extensions.",
+      "formula": "BCE = -1/N ∑ [y_i log(p_i) + (1-y_i) log(1-p_i)]",
+      "questions": [
+        "Derive the gradient update rule for Logistic Regression using MLE.",
+        "Why can't linear regression with squared loss be used directly for classification?",
+        "How do odds ratios (e^β) interpret feature changes?"
+      ]
+    },
+    {
+      "id": "trees_rf",
+      "domain": "core_ml",
+      "domainName": "1. Core ML & Deep Learning",
+      "title": "Decision Trees & Random Forests",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "ds"
+      ],
+      "desc": "Splitting criteria (Gini impurity, Entropy, Information Gain). Bagging to reduce variance. Sub-sampling sqrt(p) features per split. Out-of-Bag (OOB) error estimation & MDI vs Permutation importance.",
+      "formula": "Gini = 1 - ∑ (p_i)², Entropy = - ∑ p_i log₂(p_i)",
+      "questions": [
+        "Why does feature randomness in Random Forests decrease correlation between trees?",
+        "How does Permutation Feature Importance differ from Mean Decrease in Impurity (MDI)?",
+        "How do tree depth and min_samples_split prevent overfitting?"
+      ]
+    },
+    {
+      "id": "gbms",
+      "domain": "core_ml",
+      "domainName": "1. Core ML & Deep Learning",
+      "title": "Gradient Boosting (XGBoost, LightGBM, CatBoost)",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "ds"
+      ],
+      "desc": "Sequential boosting fitting pseudo-residuals. XGBoost second-order Taylor expansion, gain calculation, weight regularization (γ, λ). LightGBM leaf-wise growth (GOSS, EFB). CatBoost ordered target encoding.",
+      "formula": "Obj = ∑ L(y_i, ŷ_i^(t-1) + f_t(x_i)) + Ω(f_t)",
+      "questions": [
+        "Explain the second-order Taylor expansion used in XGBoost's objective function.",
+        "Compare leaf-wise tree growth (LightGBM) vs depth-wise growth (XGBoost standard).",
+        "How does CatBoost prevent target leakage when encoding categorical features?"
+      ]
+    },
+    {
+      "id": "dl_fnn",
+      "domain": "core_ml",
+      "domainName": "1. Core ML & Deep Learning",
+      "title": "Feedforward Neural Networks & Backprop",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "genai",
+        "research"
+      ],
+      "desc": "Multilayer Perceptrons (MLP), activation functions (ReLU, GELU, Swish). Detailed partial derivative chain rule for weights/biases. Optimizers: Momentum, RMSprop, Adam, AdamW. Vanishing/exploding gradient mitigation.",
+      "formula": "∂L/∂W = (∂L/∂a) * (∂a/∂z) * (∂z/∂W) | Adam: m_t / (√v_t + ε)",
+      "questions": [
+        "Why does AdamW decouple weight decay from gradient updates compared to standard Adam?",
+        "How do He (Kaiming) and Xavier initialization prevent gradient explosion/vanishing?",
+        "What is the mathematical difference between GELU and ReLU?"
+      ]
+    },
+    {
+      "id": "transformers",
+      "domain": "core_ml",
+      "domainName": "1. Core ML & Deep Learning",
+      "title": "Transformers & Attention Mechanisms",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "genai",
+        "research"
+      ],
+      "desc": "Scaled Dot-Product Attention & Multi-Head Self-Attention formulation (Q, K, V). Absolute vs Rotary Position Embeddings (RoPE). Encoder-only (BERT), Decoder-only (GPT), and Encoder-Decoder (T5) paradigms.",
+      "formula": "Attention(Q,K,V) = softmax( (Q Kᵀ) / √d_k ) V",
+      "questions": [
+        "Why do we divide by √d_k in scaled dot-product attention?",
+        "Explain the difference between FlashAttention memory IO savings vs standard attention.",
+        "How does RoPE embed relative position information directly into Query/Key rotation?"
+      ]
+    },
+    {
+      "id": "peft_lora",
+      "domain": "genai",
+      "domainName": "2. GenAI, LLMs & Agents (NEW)",
+      "title": "PEFT: LoRA & QLoRA Fine-Tuning",
+      "status": "todo",
+      "roles": [
+        "genai",
+        "mle",
+        "research"
+      ],
+      "desc": "Parameter-Efficient Fine-Tuning. Low-Rank Adaptation (LoRA) decomposing weight updates ΔW = B × A with rank r << d. QLoRA using 4-bit NormalFloat (NF4), Double Quantization, and Paged Optimizers.",
+      "formula": "W_updated = W_frozen + (α / r) * (B × A),  where B ∈ R^(d×r), A ∈ R^(r×k)",
+      "questions": [
+        "How does LoRA reduce GPU VRAM requirements during model fine-tuning?",
+        "What is NF4 in QLoRA and why is it information-theoretically optimal for zero-mean normal weights?",
+        "When should you adapt query/value matrices vs all linear layers in an LLM?"
+      ]
+    },
+    {
+      "id": "alignment_rlhf",
+      "domain": "genai",
+      "domainName": "2. GenAI, LLMs & Agents (NEW)",
+      "title": "LLM Alignment: RLHF, DPO & KTO",
+      "status": "todo",
+      "roles": [
+        "genai",
+        "research"
+      ],
+      "desc": "Aligning models with human feedback. RLHF with Reward Model and PPO policy optimization. Direct Preference Optimization (DPO) implicitly optimizing policy using pairwise preferences without separate reward models.",
+      "formula": "L_DPO = -E [ log σ( β log(π_θ(y_w|x)/π_ref(y_w|x)) - β log(π_θ(y_l|x)/π_ref(y_l|x)) ) ]",
+      "questions": [
+        "Why does DPO eliminate the stability issues and memory overhead of PPO in RLHF?",
+        "What role does the KL-divergence penalty term play during preference fine-tuning?",
+        "What is Kahneman-Tversky Optimization (KTO) and how does it use binary signals?"
+      ]
+    },
+    {
+      "id": "quantization",
+      "domain": "genai",
+      "domainName": "2. GenAI, LLMs & Agents (NEW)",
+      "title": "Model Quantization & Inference Kernels",
+      "status": "todo",
+      "roles": [
+        "genai",
+        "mlops",
+        "mle"
+      ],
+      "desc": "Post-Training Quantization (PTQ) vs Quantization-Aware Training (QAT). AWQ (Activation-aware Weight Quantization), GPTQ, GGUF/ggml, BitsAndBytes. Speculative Decoding & Continuous Batching.",
+      "formula": "q = round( x / S ) + Z,  S = (x_max - x_min) / (2^bits - 1)",
+      "questions": [
+        "How does AWQ identify the 1% salient weights to keep at higher precision?",
+        "Explain Continuous Batching (vLLM / PagedAttention) vs static batching.",
+        "How does Speculative Decoding achieve speedups without degrading token quality?"
+      ]
+    },
+    {
+      "id": "advanced_rag",
+      "domain": "genai",
+      "domainName": "2. GenAI, LLMs & Agents (NEW)",
+      "title": "Advanced RAG, Hybrid Search & GraphRAG",
+      "status": "todo",
+      "roles": [
+        "genai",
+        "mle"
+      ],
+      "desc": "Chunking strategies, Hybrid Search (Dense vectors + BM25 Sparse search with Reciprocal Rank Fusion - RRF). Cross-Encoder Re-ranking models. GraphRAG linking knowledge graphs with semantic embeddings.",
+      "formula": "RRF_score(d) = ∑ 1 / (60 + rank_i(d))",
+      "questions": [
+        "Why is hybrid search (vector + keyword) superior for domain-specific technical terminology?",
+        "How do Cross-Encoder rerankers improve precision compared to Bi-Encoder cosine retrieval?",
+        "Explain GraphRAG and how knowledge graph traversal resolves multi-hop questions."
+      ]
+    },
+    {
+      "id": "agentic_frameworks",
+      "domain": "genai",
+      "domainName": "2. GenAI, LLMs & Agents (NEW)",
+      "title": "Agentic Systems & Tool-Calling Architectures",
+      "status": "todo",
+      "roles": [
+        "genai",
+        "mle"
+      ],
+      "desc": "Autonomous Agents using ReAct (Reasoning + Acting) prompt patterns. Function/Tool calling, stateful graph execution (LangGraph, AutoGen, CrewAI). Human-in-the-loop cycles and memory layers.",
+      "formula": "State_t+1 = Graph_Edge(State_t, Tool_Output(Action_t))",
+      "questions": [
+        "How do state-graph frameworks handle cycles and back-tracking in LLM agents?",
+        "How do you benchmark and prevent infinite execution loops in tool-augmented agents?",
+        "Explain Structured Output generation (JSON mode / Pydantic validation) enforcement."
+      ]
+    },
+    {
+      "id": "dist_training",
+      "domain": "dist_infra",
+      "domainName": "3. Distributed Training & Hardware (NEW)",
+      "title": "Distributed Training: DDP, FSDP & DeepSpeed",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "mlops",
+        "research"
+      ],
+      "desc": "Distributed Data Parallel (DDP) all-reduce gradients. Fully Sharded Data Parallel (FSDP) and DeepSpeed ZeRO-1 (Optimizer state), ZeRO-2 (Gradients), ZeRO-3 (Parameters sharding) across GPUs.",
+      "formula": "ZeRO-3 VRAM per GPU = (Params + Grads + OptStates) / N_GPUs",
+      "questions": [
+        "How does FSDP reduce per-GPU memory overhead compared to PyTorch DDP?",
+        "Differentiate between Data Parallelism, Tensor Parallelism (Megatron-LM), and Pipeline Parallelism.",
+        "What is communication overhead in All-Reduce and how does gradient accumulation help?"
+      ]
+    },
+    {
+      "id": "gpu_arch_mem",
+      "domain": "dist_infra",
+      "domainName": "3. Distributed Training & Hardware (NEW)",
+      "title": "GPU Memory Math & Hardware Profiling",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "mlops",
+        "research"
+      ],
+      "desc": "Estimating VRAM for LLM training/inference. Memory bandwidth bottleneck vs compute bound (Roofline model). FP16 / BF16 / FP8 precision calculations. CUDA streams, Tensor Cores, FlashAttention-3.",
+      "formula": "Inference VRAM ≈ 2B * Params + KV_Cache(2 * n_layers * n_heads * d_head * seq_len * batch)",
+      "questions": [
+        "Calculate the minimum VRAM required to load a 70B FP16 model vs 4-bit quantized model.",
+        "Why is BF16 preferred over FP16 for deep learning training stability?",
+        "Explain the difference between compute-bound and memory-bandwidth-bound matrix operations."
+      ]
+    },
+    {
+      "id": "dsa_arrays_ptrs",
+      "domain": "dsa",
+      "domainName": "4. Data Structures & Algorithms",
+      "title": "Arrays, Two Pointers & Sliding Window",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "ds",
+        "genai",
+        "mlops"
+      ],
+      "desc": "Fixed & variable sliding window patterns. Prefix sums, Kadane's Algorithm for max subarray, two pointer convergences, matrix rotations, and in-place transformations.",
+      "formula": "Subarray Sum(i, j) = PrefixSum[j] - PrefixSum[i-1] | O(N) time",
+      "questions": [
+        "How do you solve the Minimum Size Subarray Sum in O(N) using sliding window?",
+        "Explain Kadane's algorithm and how it handles all-negative arrays."
+      ]
+    },
+    {
+      "id": "dsa_trees_graphs",
+      "domain": "dsa",
+      "domainName": "4. Data Structures & Algorithms",
+      "title": "Trees, Graphs, BFS/DFS & Topological Sort",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "genai"
+      ],
+      "desc": "Binary search tree traversals (Pre, In, Post, Level-order). Graph representations (Adjacency list/matrix). DFS, BFS, Dijkstra's algorithm, Kahn's Topological Sort for DAG dependency resolution.",
+      "formula": "Queue BFS = O(V + E) time | Topological Sort via In-degree count",
+      "questions": [
+        "How do you detect a cycle in a directed vs undirected graph?",
+        "Implement Kahn's Algorithm for topological sorting of workflow tasks."
+      ]
+    },
+    {
+      "id": "dsa_dp",
+      "domain": "dsa",
+      "domainName": "4. Data Structures & Algorithms",
+      "title": "Dynamic Programming (1D, 2D & Grid)",
+      "status": "todo",
+      "roles": [
+        "mle"
+      ],
+      "desc": "Overlapping subproblems & optimal substructure. Memoization (top-down) vs Tabulation (bottom-up). Coin Change, Longest Increasing Subsequence (LIS), Edit Distance, 0/1 Knapsack.",
+      "formula": "DP[i][j] = min(DP[i-1][j], DP[i][j-1], DP[i-1][j-1] + cost)",
+      "questions": [
+        "How do you reduce the space complexity of Edit Distance from O(N*M) to O(min(N,M))?",
+        "Explain the state transition equation for the 0/1 Knapsack problem."
+      ]
+    },
+    {
+      "id": "mlsys_recsys",
+      "domain": "mlops",
+      "domainName": "5. MLOps & System Design",
+      "title": "ML System Design: Recommendation & Search",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "mlops"
+      ],
+      "desc": "Multi-stage architecture: Candidate Generation (Retrieval) -> Scoring/Ranking -> Re-ranking & Diversity filtering. Two-Tower Neural Networks, Vector index search (HNSW), real-time feature retrieval.",
+      "formula": "Sim(user, item) = < u_embed, i_embed > / (||u|| * ||i||)",
+      "questions": [
+        "How do you handle the cold-start problem for new items in a recommendation pipeline?",
+        "Why use a multi-stage cascade (candidate gen -> ranking) instead of ranking all items directly?"
+      ]
+    },
+    {
+      "id": "mlops_serving",
+      "domain": "mlops",
+      "domainName": "5. MLOps & System Design",
+      "title": "High-Throughput Model Serving & Compression",
+      "status": "todo",
+      "roles": [
+        "mlops",
+        "mle"
+      ],
+      "desc": "Triton Inference Server, vLLM, TensorRT, ONNX Runtime. Batching mechanisms (Dynamic vs Continuous batching), Knowledge Distillation, Structured Pruning, Model Registration (MLflow).",
+      "formula": "L_distill = α * KL(Student || Teacher) + (1-α) * BCE(Student, Y)",
+      "questions": [
+        "How does Knowledge Distillation transfer Dark Knowledge from a teacher model to student model?",
+        "What are the benefits of converting PyTorch models to ONNX runtime engine graph execution?"
+      ]
+    },
+    {
+      "id": "mlops_drift",
+      "domain": "mlops",
+      "domainName": "5. MLOps & System Design",
+      "title": "Data Drift, Concept Drift & Monitoring",
+      "status": "todo",
+      "roles": [
+        "mlops",
+        "mle",
+        "ds"
+      ],
+      "desc": "Data Drift (P(X) changes) vs Concept Drift (P(Y|X) changes). Statistical testing: Kolmogorov-Smirnov (KS) test, Population Stability Index (PSI). Monitoring with Evidently AI, Prometheus, Grafana.",
+      "formula": "PSI = ∑ ( Actual% - Expected% ) * ln( Actual% / Expected% )",
+      "questions": [
+        "How do you distinguish between covariate shift (data drift) and concept drift in production?",
+        "What PSI threshold indicates a significant shift requiring model retraining?"
+      ]
+    },
+    {
+      "id": "vector_dbs",
+      "domain": "swe_math",
+      "domainName": "6. SWE, Data Eng & Math",
+      "title": "Vector DBs & Indexing (HNSW, IVFFlat)",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "genai",
+        "mlops"
+      ],
+      "desc": "Approximate Nearest Neighbor (ANN) search algorithms. Hierarchical Navigable Small World (HNSW) graphs, Inverted File Index with Product Quantization (IVFPQ). Pinecone, Qdrant, Milvus, Pgvector.",
+      "formula": "HNSW multi-layer graph skip-lists | O(log N) search complexity",
+      "questions": [
+        "Compare exact kNN brute force search vs ANN index accuracy and query latency trade-offs.",
+        "How does Product Quantization (PQ) compress high-dimensional vectors to fit in RAM?"
+      ]
+    },
+    {
+      "id": "python_async",
+      "domain": "swe_math",
+      "domainName": "6. SWE, Data Eng & Math",
+      "title": "Advanced Python, AsyncIO & Pydantic",
+      "status": "todo",
+      "roles": [
+        "mle",
+        "genai",
+        "mlops"
+      ],
+      "desc": "Python concurrency: GIL limits, threading vs multiprocessing vs AsyncIO for non-blocking IO bound API calls. Data validation using Pydantic v2. Decorators, generators, memory profiling.",
+      "formula": "async def fetch(): await asyncio.gather(*tasks)",
+      "questions": [
+        "Why should you use AsyncIO instead of Multiprocessing when serving LLM API requests?",
+        "How does Pydantic v2 achieve fast validation performance using Rust core?"
+      ]
+    },
+    {
+      "id": "sql_window",
+      "domain": "swe_math",
+      "domainName": "6. SWE, Data Eng & Math",
+      "title": "Advanced SQL & Feature Store Integration",
+      "status": "todo",
+      "roles": [
+        "ds",
+        "mle",
+        "mlops"
+      ],
+      "desc": "Window functions (ROW_NUMBER, RANK, DENSE_RANK, LEAD, LAG). Complex CTEs, feature aggregations. Online (Redis) vs Offline (Snowflake/BigQuery) Feature Stores (Feast, Tecton).",
+      "formula": "AVG(val) OVER (PARTITION BY user_id ORDER BY time RANGE BETWEEN...)",
+      "questions": [
+        "Write a SQL query to compute a 7-day rolling average of user transactions without data leakage.",
+        "How do Feature Stores ensure point-in-time correctness during historical training feature extraction?"
+      ]
+    },
+    {
+      "id": "stat_inference",
+      "domain": "stats",
+      "domainName": "7. Statistics, Experimentation & Causal Inference",
+      "title": "Statistical Inference & Uncertainty",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "ds"
+      ],
+      "desc": "Sampling distributions, confidence intervals, hypothesis tests, effect sizes, p-values, practical significance, robust standard errors, and assumptions behind inference.",
+      "formula": "95% CI ≈ estimate ± 1.96 × SE (under suitable assumptions)",
+      "questions": [
+        "What does a 95% confidence interval mean under repeated sampling?",
+        "When would you use clustered or heteroscedasticity-robust standard errors?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "exp_design",
+      "domain": "stats",
+      "domainName": "7. Statistics, Experimentation & Causal Inference",
+      "title": "A/B Tests, Power & Experiment Design",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "ds",
+        "mle"
+      ],
+      "desc": "Specify the primary metric, randomization unit, guardrails, minimum detectable effect, power, duration, exposure and sample-ratio mismatch before a launch.",
+      "formula": "n per arm ∝ variance × (z_α/2 + z_β)² / MDE²",
+      "questions": [
+        "Why does user-level randomization matter when users make repeated requests?",
+        "How would you detect a sample-ratio mismatch and protect the decision?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "sequential_multiplicity",
+      "domain": "stats",
+      "domainName": "7. Statistics, Experimentation & Causal Inference",
+      "title": "Sequential Testing & Multiple Comparisons",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "ds"
+      ],
+      "desc": "Avoid unchecked peeking and metric fishing; compare fixed-horizon plans with sequential designs, alpha spending, false-discovery control, and predeclared stopping rules.",
+      "formula": "Bonferroni α_each = α_family / m; BH controls expected FDR",
+      "questions": [
+        "What goes wrong if a team stops its A/B test as soon as p < 0.05?",
+        "When is false discovery rate preferable to family-wise error control?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "causal_dags",
+      "domain": "stats",
+      "domainName": "7. Statistics, Experimentation & Causal Inference",
+      "title": "Causal DAGs & Identification",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "ds",
+        "research"
+      ],
+      "desc": "Define treatment, outcome, confounders, mediators and colliders. Use a causal graph to decide what to adjust for and state the identification assumptions.",
+      "formula": "Back-door adjustment: E[Y | do(T=t)] = Σ_z E[Y | T=t,Z=z]P(Z=z)",
+      "questions": [
+        "Why can conditioning on a collider introduce bias?",
+        "How would you separate a causal business claim from predictive feature importance?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "causal_observational",
+      "domain": "stats",
+      "domainName": "7. Statistics, Experimentation & Causal Inference",
+      "title": "Observational Causal Methods",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "ds"
+      ],
+      "desc": "Propensity scores and overlap, difference-in-differences with parallel trends, instrumental variables with exclusion restrictions, and heterogeneous treatment effects/uplift.",
+      "formula": "DiD = (Y_treat,post − Y_treat,pre) − (Y_ctrl,post − Y_ctrl,pre)",
+      "questions": [
+        "What evidence would support the parallel-trends assumption?",
+        "How do you diagnose poor overlap before estimating an average treatment effect?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "bayesian_decisions",
+      "domain": "stats",
+      "domainName": "7. Statistics, Experimentation & Causal Inference",
+      "title": "Bayesian Inference & Decision Theory",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "ds",
+        "research"
+      ],
+      "desc": "Priors, likelihood, posterior uncertainty, hierarchical models, posterior predictive checks and expected utility for action under uncertainty.",
+      "formula": "p(θ | D) ∝ p(D | θ)p(θ); choose action a maximizing E[U(a,θ) | D]",
+      "questions": [
+        "When would partial pooling outperform separate segment estimates?",
+        "How would you explain a posterior probability to a product leader?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "forecasting",
+      "domain": "stats",
+      "domainName": "7. Statistics, Experimentation & Causal Inference",
+      "title": "Forecasting & Time-Series Validation",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "ds",
+        "mle"
+      ],
+      "desc": "Trend, seasonality, autocorrelation, interventions, hierarchical forecasts, backtesting, leakage prevention and interval calibration.",
+      "formula": "Rolling-origin validation: train ≤ t, forecast t+h; repeat over origins",
+      "questions": [
+        "Why can random cross-validation inflate a forecasting result?",
+        "How would you choose between a seasonal baseline and a complex model?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "product_metrics",
+      "domain": "stats",
+      "domainName": "7. Statistics, Experimentation & Causal Inference",
+      "title": "Product Metrics & Business Outcomes",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "principal_swe",
+        "ds"
+      ],
+      "desc": "Define a north-star outcome, leading indicators, countermetrics, segmentation, economic value and decision thresholds; distinguish offline ML metrics from product lift.",
+      "formula": "Expected net value = incremental benefit − serving cost − operational risk",
+      "questions": [
+        "A model improves AUC but worsens conversion: how do you investigate?",
+        "How would you design guardrail metrics for a recommendation launch?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "consistency_replication",
+      "domain": "distributed",
+      "domainName": "8. Distributed Software Systems",
+      "title": "Consistency, Replication & Sharding",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "mle"
+      ],
+      "desc": "Strong vs eventual consistency, quorum reads/writes, leader/follower replication, partitions, hot keys and shard rebalancing; articulate CAP only under partitions.",
+      "formula": "Quorum overlap when R + W > N (subject to system assumptions)",
+      "questions": [
+        "Which consistency model suits a feature store versus a payment ledger?",
+        "How would you mitigate a hot partition during traffic spikes?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "consensus_coordination",
+      "domain": "distributed",
+      "domainName": "8. Distributed Software Systems",
+      "title": "Coordination, Consensus & Leader Election",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops"
+      ],
+      "desc": "Raft concepts, terms, quorum, failover, fencing tokens and split-brain avoidance; know where managed coordination systems remove operational burden.",
+      "formula": "A majority quorum is floor(N / 2) + 1 nodes",
+      "questions": [
+        "What happens when a leader loses the network but keeps serving writes?",
+        "Why are fencing tokens stronger than a lock with only a lease timeout?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "transactions_idempotency",
+      "domain": "distributed",
+      "domainName": "8. Distributed Software Systems",
+      "title": "Distributed Transactions & Idempotency",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "mle"
+      ],
+      "desc": "Delivery semantics, idempotency keys, outbox/inbox, sagas, retries and compensating actions; compare two-phase commit with eventual business consistency.",
+      "formula": "Idempotent operation: f(f(x)) = f(x); persist request key and outcome",
+      "questions": [
+        "How do you make an at-least-once event consumer safe for replay?",
+        "When would you choose a saga over a distributed transaction?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "streams_queues",
+      "domain": "distributed",
+      "domainName": "8. Distributed Software Systems",
+      "title": "Queues, Streams & Backpressure",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "mle"
+      ],
+      "desc": "Kafka/Event Hubs/Pub/Sub, partition ordering, consumer groups, dead-letter queues, replay, throughput and lag-based autoscaling; throttle producers when consumers saturate.",
+      "formula": "Approximate backlog growth = incoming events/s − processing events/s",
+      "questions": [
+        "How does partition count constrain consumer concurrency and ordering?",
+        "What would you monitor to detect a growing stream processing backlog?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "resilience_patterns",
+      "domain": "distributed",
+      "domainName": "8. Distributed Software Systems",
+      "title": "Caching, Rate Limits & Failure Isolation",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "genai"
+      ],
+      "desc": "Redis caching and invalidation, token buckets, timeouts, bounded retries with jitter, circuit breakers, bulkheads and load shedding under partial failure.",
+      "formula": "Total retry load ≈ original requests × attempts; cap attempts and add jitter",
+      "questions": [
+        "How can retries amplify an outage?",
+        "What cache invalidation strategy works for rapidly changing model features?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "storage_tradeoffs",
+      "domain": "distributed",
+      "domainName": "8. Distributed Software Systems",
+      "title": "Database & Storage Architecture",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "mle"
+      ],
+      "desc": "Relational vs document vs key-value vs columnar stores; indexes, isolation levels, schema evolution, query plans, replication and SQL/NoSQL trade-offs.",
+      "formula": "Choose by access patterns, consistency, latency, scale and operational cost",
+      "questions": [
+        "How would you design storage for high-volume inference events and analytical queries?",
+        "What causes a database index to stop helping a query?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "networking_concurrency",
+      "domain": "distributed",
+      "domainName": "8. Distributed Software Systems",
+      "title": "Networking, OS & Concurrency Fundamentals",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mle",
+        "mlops"
+      ],
+      "desc": "DNS/TLS/HTTP, connection pooling, thread and process models, event loops, locks, races, memory pressure and resource limits; profile before optimizing.",
+      "formula": "Little's Law: concurrent work L = arrival rate λ × time in system W",
+      "questions": [
+        "What causes tail latency to rise as utilization approaches saturation?",
+        "How do you diagnose a race or thread-pool starvation in an API?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "api_design",
+      "domain": "distributed",
+      "domainName": "8. Distributed Software Systems",
+      "title": "API Contracts & Versioning",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mle",
+        "genai"
+      ],
+      "desc": "Compatibility, pagination, idempotency, authentication, deadlines, error models and deprecation. Define contracts that survive independent team deployments.",
+      "formula": "Safe change: keep existing consumers valid or publish a versioned migration",
+      "questions": [
+        "How would you roll out a breaking model-serving API change?",
+        "When should an asynchronous job API return a resource rather than hold a connection open?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "slo_budgets",
+      "domain": "reliability",
+      "domainName": "9. Production Engineering & Reliability",
+      "title": "SLIs, SLOs & Error Budgets",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "mle"
+      ],
+      "desc": "Choose user-visible availability, latency and quality indicators; distinguish SLOs from contractual SLAs and use burn rates to balance change velocity with reliability.",
+      "formula": "Error budget = (1 − SLO target) × total eligible events",
+      "questions": [
+        "Which SLI would you choose for an LLM assistant with slow and incorrect responses?",
+        "What would trigger a release freeze under an error-budget policy?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "observability",
+      "domain": "reliability",
+      "domainName": "9. Production Engineering & Reliability",
+      "title": "Logs, Metrics, Traces & Model Telemetry",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "mle"
+      ],
+      "desc": "Correlation IDs, distributed traces, RED/USE metrics, high-cardinality guardrails, data/model drift, quality sampling and privacy-aware telemetry.",
+      "formula": "Trace context follows a request across each service and dependency",
+      "questions": [
+        "How would you isolate rising p99 latency in a multi-stage RAG pipeline?",
+        "How do you measure quality without logging sensitive prompts?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "incidents",
+      "domain": "reliability",
+      "domainName": "9. Production Engineering & Reliability",
+      "title": "Incident Response & Learning",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops"
+      ],
+      "desc": "Triage, incident command, rollback, stakeholder updates, customer impact, blameless review and action-item ownership; convert repeated incidents into systemic fixes.",
+      "formula": "Impact = affected users × severity × duration (rough prioritization)",
+      "questions": [
+        "Walk through your response to a failed model rollout affecting a large tenant.",
+        "How do you distinguish root cause from contributing factors in a postmortem?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "deployment_safety",
+      "domain": "reliability",
+      "domainName": "9. Production Engineering & Reliability",
+      "title": "Canary, Blue/Green & Rollback",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "mle"
+      ],
+      "desc": "Progressive exposure, shadow tests, feature flags, versioned models and schemas, automated guardrails, abort criteria and reversible releases.",
+      "formula": "Promote a canary only when quality, latency, errors and cost meet gates",
+      "questions": [
+        "How would you canary a new ranking model without corrupting user experience?",
+        "What makes a database schema rollout backward compatible?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "capacity_load",
+      "domain": "reliability",
+      "domainName": "9. Production Engineering & Reliability",
+      "title": "Capacity Planning & Load Testing",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "genai"
+      ],
+      "desc": "Traffic forecasts, p95/p99, saturation, queueing, burst testing, GPU utilization, autoscaling limits and headroom; model failure under realistic peaks.",
+      "formula": "Required capacity ≈ peak request rate × service time / target utilization",
+      "questions": [
+        "How would you capacity plan a 10× increase in inference traffic?",
+        "Why does average latency hide a bad user experience?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "recovery",
+      "domain": "reliability",
+      "domainName": "9. Production Engineering & Reliability",
+      "title": "Disaster Recovery & Failure Modes",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops"
+      ],
+      "desc": "Threat and failure-mode analysis, backup restore drills, region failures, RTO/RPO, dependency mapping, runbooks and graceful degradation.",
+      "formula": "RPO = maximum tolerable data loss; RTO = maximum tolerable restore time",
+      "questions": [
+        "What would your service return if its feature store is unavailable?",
+        "How would you verify that backups can actually be restored?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "performance_cost",
+      "domain": "reliability",
+      "domainName": "9. Production Engineering & Reliability",
+      "title": "Performance & Cost Optimization",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "genai",
+        "mle"
+      ],
+      "desc": "Profiling, memory and CPU bottlenecks, caching, tokens/s, throughput per GPU, infrastructure cost and cost per successful user outcome.",
+      "formula": "Unit economics = total serving and operations cost / successful outcomes",
+      "questions": [
+        "How do you decide whether to cache, distill or use a smaller model?",
+        "What would you measure before changing a slow inference service?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "ml_release",
+      "domain": "reliability",
+      "domainName": "9. Production Engineering & Reliability",
+      "title": "Model Validation & Production Controls",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "principal_swe",
+        "mlops"
+      ],
+      "desc": "Model registry, reproducibility, approval gates, offline/online skew checks, monitoring thresholds and human escalation when automated decisions fail.",
+      "formula": "Release gate = quality ∧ safety ∧ latency ∧ cost ∧ rollback readiness",
+      "questions": [
+        "How would you diagnose training-serving skew?",
+        "What evidence is needed before approving a high-impact model update?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "batch_stream",
+      "domain": "data_arch",
+      "domainName": "10. Data Architecture & Platforms",
+      "title": "Batch vs Streaming Architecture",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "mle"
+      ],
+      "desc": "Select batch, microbatch or event streaming based on freshness and correctness; understand Spark, Kafka, watermarks, late events and stateful processing.",
+      "formula": "End-to-end freshness = ingestion delay + processing delay + serving delay",
+      "questions": [
+        "When is daily batch a better design than streaming?",
+        "How would you handle late-arriving events in a rolling feature?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "lakehouse",
+      "domain": "data_arch",
+      "domainName": "10. Data Architecture & Platforms",
+      "title": "Lakehouse, Warehouse & Table Formats",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai",
+        "mlops"
+      ],
+      "desc": "Warehouse vs data lake trade-offs, Parquet, partition design, Delta/Iceberg snapshots, schema evolution and ACID behavior across analytical pipelines.",
+      "formula": "Partition pruning reduces bytes scanned when predicates align with partitions",
+      "questions": [
+        "How would you choose between a warehouse and an open table format?",
+        "What problem do table snapshots solve for model reproducibility?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "orchestration",
+      "domain": "data_arch",
+      "domainName": "10. Data Architecture & Platforms",
+      "title": "Pipeline Orchestration & Recovery",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "mle"
+      ],
+      "desc": "DAG dependencies, event triggers, retries, checkpoints, backfills, atomic publication and idempotent jobs; isolate partial output from readers.",
+      "formula": "Backfill safely: immutable input + versioned output + idempotent publish",
+      "questions": [
+        "How would you backfill two years of features without changing past training labels?",
+        "How do you recover a failed pipeline without duplicate records?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "quality_contracts",
+      "domain": "data_arch",
+      "domainName": "10. Data Architecture & Platforms",
+      "title": "Data Quality, Contracts & Ownership",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai",
+        "mlops"
+      ],
+      "desc": "Schema, null/range/freshness checks, semantic contracts, producer ownership, alert routing and downstream impact analysis; prevent silent training errors.",
+      "formula": "Data contract = schema + semantics + freshness + quality expectations + owner",
+      "questions": [
+        "What checks detect silent changes in a source column's meaning?",
+        "Who should own a contract failure between producer and feature team?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "cdc_lineage",
+      "domain": "data_arch",
+      "domainName": "10. Data Architecture & Platforms",
+      "title": "CDC, Lineage & Schema Evolution",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai",
+        "mlops"
+      ],
+      "desc": "Change data capture, event ordering, deletes, source-of-truth reconciliation, dataset lineage and compatible evolution of tables and events.",
+      "formula": "Lineage: source → transform/version → feature → model/version → decision",
+      "questions": [
+        "How do you propagate deletes from an operational database to derived datasets?",
+        "How would you find the models affected by a changed source table?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "point_time",
+      "domain": "data_arch",
+      "domainName": "10. Data Architecture & Platforms",
+      "title": "Point-in-Time Correctness",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "mle",
+        "mlops"
+      ],
+      "desc": "Event time vs availability time, historical joins, time-travel snapshots, label windows and leakage checks to match what the model could know at prediction time.",
+      "formula": "Feature available_at ≤ prediction_at; label observed after prediction_at",
+      "questions": [
+        "How does a delayed accounting update cause leakage in a historical feature?",
+        "What test would catch a point-in-time join bug?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "feature_scale",
+      "domain": "data_arch",
+      "domainName": "10. Data Architecture & Platforms",
+      "title": "Distributed Feature Engineering",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai",
+        "mle",
+        "mlops"
+      ],
+      "desc": "Spark joins and skew, offline/online feature parity, serving TTL, materialization schedules, aggregation windows and feature reuse across teams.",
+      "formula": "Offline/online parity requires matching feature definitions and cutoff times",
+      "questions": [
+        "How would you handle a highly skewed key during a Spark aggregation?",
+        "What causes offline feature accuracy to diverge from online serving?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "analytics_sql",
+      "domain": "data_arch",
+      "domainName": "10. Data Architecture & Platforms",
+      "title": "Analytical SQL at Scale",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "principal_swe",
+        "ds"
+      ],
+      "desc": "Window functions, CTEs, approximate aggregates, partition pruning, execution plans and reconciliation of metric definitions across reporting systems.",
+      "formula": "Deduplicate with ROW_NUMBER() OVER (PARTITION BY key ORDER BY event_time DESC)",
+      "questions": [
+        "How would you compute rolling retention without counting late duplicates?",
+        "How do you diagnose an unexpectedly expensive analytical join?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "identity_auth",
+      "domain": "security",
+      "domainName": "11. Security, Responsible AI & Governance",
+      "title": "Authentication, Authorization & Tenant Boundaries",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "principal_ds",
+        "mlops"
+      ],
+      "desc": "OAuth/OIDC, managed identity, service principals, least privilege, RBAC/ABAC and tenant isolation for agents, pipelines and APIs.",
+      "formula": "Authorize each resource action using caller, tenant, resource and scope",
+      "questions": [
+        "What is the difference between a delegated token and an app-only token?",
+        "How would you prevent cross-tenant retrieval in a shared vector index?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "secrets_crypto",
+      "domain": "security",
+      "domainName": "11. Security, Responsible AI & Governance",
+      "title": "Secrets, Encryption & Key Management",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "mle"
+      ],
+      "desc": "Key vaults, rotation, encryption in transit/at rest, credential lifetimes, audit logs and short-lived workload credentials; avoid secrets in prompts or code.",
+      "formula": "Prefer short-lived identity tokens; rotate and scope unavoidable secrets",
+      "questions": [
+        "How would you rotate a credential used by a live inference service?",
+        "Why is encryption at rest insufficient for an over-privileged caller?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "threat_model",
+      "domain": "security",
+      "domainName": "11. Security, Responsible AI & Governance",
+      "title": "Threat Modeling & Secure Architecture",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "genai"
+      ],
+      "desc": "Map assets, trust boundaries, entry points, attacker goals and mitigations; test abuse paths for data, tools, training and deployment.",
+      "formula": "Threat review: asset → trust boundary → abuse path → mitigation → owner",
+      "questions": [
+        "What trust boundary changes when an agent gains a write tool?",
+        "How would you prioritize threats in a new multi-tenant ML service?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "privacy_retention",
+      "domain": "security",
+      "domainName": "11. Security, Responsible AI & Governance",
+      "title": "PII, Privacy & Retention",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai",
+        "mlops"
+      ],
+      "desc": "Data minimization, purpose limitation, access controls, retention/deletion, pseudonymization, consent and privacy-aware evaluation/telemetry.",
+      "formula": "Collect only needed fields; record purpose, owner, access and deletion path",
+      "questions": [
+        "How would you honor a deletion request across datasets and model features?",
+        "What is the privacy risk in storing raw LLM prompts for debugging?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "agent_security",
+      "domain": "security",
+      "domainName": "11. Security, Responsible AI & Governance",
+      "title": "Prompt Injection & Tool/Data Exfiltration",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "genai",
+        "mlops"
+      ],
+      "desc": "Treat retrieved content and tool output as untrusted; constrain tool permissions, validate actions, enforce approvals and test exfiltration paths.",
+      "formula": "Untrusted input cannot grant authority; enforce authorization at the tool boundary",
+      "questions": [
+        "How can a document prompt injection trigger an unauthorized tool call?",
+        "What controls still work if the model follows the malicious instruction?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "supply_chain",
+      "domain": "security",
+      "domainName": "11. Security, Responsible AI & Governance",
+      "title": "Model & Software Supply-Chain Security",
+      "roles": [
+        "principal_swe",
+        "principal_ai",
+        "mlops",
+        "research"
+      ],
+      "desc": "Provenance of models, datasets, dependencies and container images; pin and scan artifacts, constrain deserialization, record licenses and sign releases.",
+      "formula": "Reproducible build = pinned inputs + verifiable artifacts + deployment record",
+      "questions": [
+        "Why is loading an untrusted model checkpoint dangerous?",
+        "How would you audit which model version served a disputed decision?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "fairness",
+      "domain": "security",
+      "domainName": "11. Security, Responsible AI & Governance",
+      "title": "Responsible AI & Fairness Evaluation",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "principal_swe",
+        "research"
+      ],
+      "desc": "Group-level metrics, calibration, disparate outcomes, robustness, accessibility and trade-offs; define mitigations with domain experts and affected stakeholders.",
+      "formula": "Compare group metrics with confidence intervals and clear population definitions",
+      "questions": [
+        "What can go wrong when optimizing a single fairness metric?",
+        "How would you evaluate harm across segments with small sample sizes?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "model_governance",
+      "domain": "security",
+      "domainName": "11. Security, Responsible AI & Governance",
+      "title": "Model Governance & Human Oversight",
+      "roles": [
+        "principal_ds",
+        "principal_ai",
+        "principal_swe",
+        "mlops"
+      ],
+      "desc": "Model cards, intended use, evaluation records, review gates, versioning, monitoring, escalation and retirement; tie control strength to decision impact.",
+      "formula": "Governance record = intended use + evidence + approver + version + monitoring",
+      "questions": [
+        "What documentation would you require before a high-impact model launch?",
+        "When should a human review or override automated output?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "ambiguity",
+      "domain": "leadership",
+      "domainName": "12. Principal Engineering / Science Leadership",
+      "title": "Frame Ambiguous Problems & Define Strategy",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai"
+      ],
+      "desc": "Turn a vague business request into a measurable problem, constraints, hypotheses, decision owners and stop criteria before choosing technology.",
+      "formula": "Problem brief = objective + users + constraints + success metric + decision date",
+      "questions": [
+        "How would you respond to 'we need an AI agent' without a defined user problem?",
+        "Which unknowns would you resolve before committing to a platform rewrite?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "design_docs",
+      "domain": "leadership",
+      "domainName": "12. Principal Engineering / Science Leadership",
+      "title": "Architecture & Scientific Design Documents",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai"
+      ],
+      "desc": "Write alternatives, assumptions, experiments, data flows, scale/security risks, rollout and decision records so peers can challenge the plan.",
+      "formula": "Design doc: context → options → trade-offs → decision → validation → rollback",
+      "questions": [
+        "What would you include in a design review for a cross-team RAG system?",
+        "How do you document uncertainty without blocking a decision?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "build_buy",
+      "domain": "leadership",
+      "domainName": "12. Principal Engineering / Science Leadership",
+      "title": "Architecture Trade-offs & Build vs Buy",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai"
+      ],
+      "desc": "Compare managed and self-hosted options on capability, switching cost, security, reliability, total cost and team operating capacity.",
+      "formula": "TCO = build + run + migration + risk cost − avoided costs",
+      "questions": [
+        "When would you choose a managed vector database rather than build one?",
+        "How do you avoid overfitting a design to today's workload?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "roadmap",
+      "domain": "leadership",
+      "domainName": "12. Principal Engineering / Science Leadership",
+      "title": "Technical Roadmaps & Debt Portfolio",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai"
+      ],
+      "desc": "Create staged multi-quarter bets, dependencies, architecture milestones and exit criteria; allocate effort to systemic technical debt and reliability.",
+      "formula": "Prioritize by expected impact, uncertainty reduction, urgency and effort",
+      "questions": [
+        "How would you sequence a migration while delivering product value?",
+        "How do you justify paying down technical debt to leadership?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "influence",
+      "domain": "leadership",
+      "domainName": "12. Principal Engineering / Science Leadership",
+      "title": "Cross-Team Influence & Large Migrations",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai"
+      ],
+      "desc": "Align teams without direct authority through shared interfaces, review forums, migration paths, ownership boundaries and measured adoption.",
+      "formula": "Migration: dual-run → compare → limited rollout → cutover → retire old path",
+      "questions": [
+        "How would you resolve competing priorities among three teams?",
+        "How do you know a migration succeeded beyond code deployment?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "mentoring",
+      "domain": "leadership",
+      "domainName": "12. Principal Engineering / Science Leadership",
+      "title": "Mentoring, Reviews & Technical Standards",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai"
+      ],
+      "desc": "Coach senior peers, run constructive design and code reviews, set repeatable standards, distribute decision making and develop successors.",
+      "formula": "Leadership evidence: decisions improved and other people independently succeed",
+      "questions": [
+        "How would you mentor a senior engineer with a different architectural view?",
+        "What standard would prevent repeated data-leakage mistakes across teams?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "executive_comms",
+      "domain": "leadership",
+      "domainName": "12. Principal Engineering / Science Leadership",
+      "title": "Executive Communication & Investment Cases",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai"
+      ],
+      "desc": "Communicate trade-offs, risk, customer impact, unit economics and confidence in plain language; ask for concrete decisions and report outcomes.",
+      "formula": "Recommendation = decision requested + benefit + cost + risk + evidence",
+      "questions": [
+        "How would you explain a model launch delay to a VP?",
+        "How do you quantify the value of reliability work with uncertain estimates?"
+      ],
+      "status": "todo"
+    },
+    {
+      "id": "stop_decisions",
+      "domain": "leadership",
+      "domainName": "12. Principal Engineering / Science Leadership",
+      "title": "Product Judgment & Stop/Scale Decisions",
+      "roles": [
+        "principal_ds",
+        "principal_swe",
+        "principal_ai"
+      ],
+      "desc": "Run decision-oriented pilots, set kill criteria, compare simpler baselines and sunset work when evidence shows low value or excessive risk.",
+      "formula": "Scale only if incremental outcome − full cost > 0 at acceptable risk",
+      "questions": [
+        "Tell me about a project you stopped despite technical success.",
+        "What evidence would persuade you to replace an advanced model with a rule?"
+      ],
+      "status": "todo"
+    }
+  ],
+  "domains": [
+    {
+      "id": "core_ml",
+      "name": "1. Machine Learning & Deep Learning Core",
+      "short": "Core ML",
+      "layer": "Foundation"
+    },
+    {
+      "id": "genai",
+      "name": "2. Generative AI, LLMs & Agentic Frameworks",
+      "short": "GenAI",
+      "layer": "Foundation"
+    },
+    {
+      "id": "dist_infra",
+      "name": "3. Distributed Training & GPU Infrastructure",
+      "short": "GPU / Training",
+      "layer": "Production"
+    },
+    {
+      "id": "dsa",
+      "name": "4. Data Structures & Algorithms",
+      "short": "DS & Algo",
+      "layer": "Foundation"
+    },
+    {
+      "id": "mlops",
+      "name": "5. MLOps & System Design",
+      "short": "MLOps",
+      "layer": "Production"
+    },
+    {
+      "id": "swe_math",
+      "name": "6. Software Engineering, Math & Vector Databases",
+      "short": "SWE / Math",
+      "layer": "Foundation"
+    },
+    {
+      "id": "stats",
+      "name": "7. Statistics, Experimentation & Causal Inference",
+      "short": "Statistics",
+      "layer": "Principal"
+    },
+    {
+      "id": "distributed",
+      "name": "8. Distributed Software Systems",
+      "short": "Systems",
+      "layer": "Principal"
+    },
+    {
+      "id": "reliability",
+      "name": "9. Production Engineering & Reliability",
+      "short": "Reliability",
+      "layer": "Principal"
+    },
+    {
+      "id": "data_arch",
+      "name": "10. Data Architecture & Platforms",
+      "short": "Data Arch",
+      "layer": "Principal"
+    },
+    {
+      "id": "security",
+      "name": "11. Security, Responsible AI & Governance",
+      "short": "Security",
+      "layer": "Principal"
+    },
+    {
+      "id": "leadership",
+      "name": "12. Principal Engineering / Science Leadership",
+      "short": "Leadership",
+      "layer": "Principal"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+# Normalize to LF in the repository AND keep LF in the working tree on every
+# platform. The `eol=lf` half is what overrides Git for Windows' default
+# core.autocrlf=true, which is what makes editors warn that an LF file will be
+# checked out as CRLF.
+* text=auto eol=lf
+
+# Shell scripts are run by bash. CRLF breaks the shebang on Linux and in CI
+# with "bad interpreter: No such file or directory".
+*.sh text eol=lf
+
+# Windows batch files are the one thing that genuinely needs CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Generated: keep it out of diffs and out of language stats.
+pnpm-lock.yaml text eol=lf linguist-generated
+
+# Truly binary — Git must never translate these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.pdf binary
