@@ -67,7 +67,7 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
       <div className="topic-columns">
         <div className="topic-main">
           {lesson && (
-            <section className="topic-section">
+            <section className="topic-section topic-map">
               <div className="topic-overview">
                 <ReactMarkdown remarkPlugins={[remarkGfm]} components={HEADINGS_UNDER_TITLE}>{lesson.overview}</ReactMarkdown>
               </div>

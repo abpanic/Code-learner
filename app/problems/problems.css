@@ -1,5 +1,5 @@
 .problems-shell { min-height: 100vh; }
-.problems-page { max-width: 1180px; margin: 0 auto; padding: 30px clamp(20px, 4vw, 56px) 64px; }
+.problems-page { max-width: var(--page-max); margin: 0 auto; padding: 30px clamp(20px, 4vw, 56px) 64px; }
 
 .problems-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 22px; }
 .problems-heading h1 { margin: 0 0 7px; font-size: 34px; letter-spacing: -.03em; }

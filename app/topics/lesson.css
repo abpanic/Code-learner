@@ -1,5 +1,5 @@
 .lesson-shell { min-height: 100vh; background:var(--info-surface); color:var(--ink); }
-.lesson-container { max-width: 1480px; margin: auto; padding: 20px clamp(20px,4vw,64px) 90px; }
+.lesson-container { max-width: var(--page-max); margin: auto; padding: 20px clamp(20px,4vw,64px) 90px; }
 .lesson-breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color:var(--ink-3); font-size: 12px; }
 .lesson-breadcrumb a { color:var(--brand); }.lesson-breadcrumb a:hover { text-decoration: underline; }
 .lesson-breadcrumb strong { font-weight: 650; color:var(--ink-2); }
@@ -29,3 +29,7 @@
 @media(max-width:1050px) { .lesson-layout { grid-template-columns: 190px minmax(0,1fr); gap: 22px; }.method-list { grid-template-columns: 1fr; }.method-list .lesson-equation { font-size: 14px; } }
 @media(max-width:760px) { .lesson-layout { display: block; }.lesson-side { position: static; margin-bottom: 18px; }.lesson-side-card { display: none; }.lesson-side-note { margin: 0; }.lesson-heading { align-items: flex-start; flex-direction: column; }.lesson-heading-actions { flex: none; width: auto; }.lesson-cta { width: auto; }.example-grid { grid-template-columns: 1fr; }.example-numbers { display: grid; grid-template-columns: repeat(2,1fr); }.lesson-container { padding-top: 15px; } }
 @media(max-width:520px) { .lesson-heading h1 { font-size: 30px; }.lesson-heading p:not(.eyebrow) { font-size: 14px; }.lesson-two-up, .example-numbers { grid-template-columns: 1fr; }.lesson-equation { font-size: 12px; }.diagnostic-table > div { grid-template-columns: 1fr; gap: 3px; }.lesson-progress { flex-direction: column; align-items: stretch; }.lesson-progress-control { min-width: 0; } }
+
+/* Section prose matches the markdown measure; snippets stay full width. */
+.lesson-section > p, .practice-list h3, .practice-list p { max-width: 76ch; }
+.lesson-callout p, .lesson-callout strong { max-width: 78ch; }

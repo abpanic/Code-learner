@@ -82,7 +82,7 @@ export function Workspace({ problem }: { problem: Problem }) {
   const busy = state.phase === "running" || state.phase === "starting";
   const solved = state.phase === "done" && state.total > 0 && state.passed === state.total;
 
-  return <section className="workspace" aria-label="Code workspace">
+  return <section className="code-workspace" aria-label="Code workspace">
     <div className="workspace-bar">
       <div className="lang-switch" role="group" aria-label="Language">
         {available.map((option) => (

@@ -1,4 +1,6 @@
-.core-markdown { color:var(--ink-2); font-size: 15px; line-height: 1.73; }
+.core-markdown { color:var(--ink-2); font-size: 15.5px; line-height: 1.73; }
+/* Prose keeps a readable measure; code, tables and equations use the width. */
+.core-markdown > p, .core-markdown > ul, .core-markdown > ol, .core-markdown > blockquote { max-width: 76ch; }
 .core-markdown p { margin: 12px 0; }
 .core-markdown strong { color:var(--ink-2); }
 .core-markdown .katex-display { margin: 20px 0; padding: 15px 10px; border:1px solid var(--brand-line); border-radius: 9px; background:var(--brand-surface); overflow-x: auto; overflow-y: hidden; font-size: 1.08em; }

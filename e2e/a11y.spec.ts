@@ -230,3 +230,75 @@ for (const path of PAGES) {
     expect(skips, "heading levels should not skip").toStrictEqual([]);
   });
 }
+
+/**
+ * Layout at width. The complaint that started this: a wide display showed a
+ * narrow column of text with most of the screen empty. Prose still needs a
+ * readable measure, so the check is that the *page* uses the width and the
+ * *paragraph* does not exceed a comfortable line length.
+ */
+test.describe("wide screens", () => {
+  test.use({ viewport: { width: 1920, height: 1000 } });
+
+  const shells = ["/", "/problems", "/problems/two-sum-indices", "/topics", "/topics/lin_reg",
+                  "/topics/lin_reg/ols-fit", "/matrix"];
+
+  for (const path of shells) {
+    test(`uses the available width on ${path}`, async ({ page }) => {
+      await page.goto(path);
+      const width = await page.evaluate(() => {
+        const candidates = [".dashboard", ".problems-page", ".problem-detail", ".topics-index",
+                            ".topic-page", ".lesson-container", ".workspace"];
+        return Math.max(...candidates.map((s) => {
+          const el = document.querySelector(s);
+          return el ? el.getBoundingClientRect().width : 0;
+        }));
+      });
+      // One shared shell width, so nothing jumps as you navigate.
+      expect(Math.round(width)).toBe(1560);
+    });
+  }
+
+  test("keeps paragraphs to a readable measure", async ({ page }) => {
+    for (const path of ["/topics/lin_reg", "/topics/lin_reg/ols-fit", "/problems/two-sum-indices"]) {
+      await page.goto(path);
+      // The notebook renders after fetch, so wait for its prose before measuring.
+      await page.waitForTimeout(1200);
+      const tooWide = await page.evaluate(() =>
+        Array.from(document.querySelectorAll("p"))
+          .filter((el) => (el.textContent ?? "").trim().length > 120)
+          .map((el) => {
+            const style = getComputedStyle(el);
+            const chars = el.getBoundingClientRect().width / (parseFloat(style.fontSize) * 0.5);
+            return { chars: Math.round(chars), text: (el.textContent ?? "").trim().slice(0, 40) };
+          })
+          .filter((row) => row.chars > 95),
+      );
+      expect(tooWide.map((r) => `${r.chars}ch "${r.text}"`), path).toStrictEqual([]);
+    }
+  });
+
+  /**
+   * The editor panel and the generic page shell both answered to `.workspace`,
+   * so the shell's page padding was landing inside the editor card and eating
+   * ~128px of the code area. Separate names now; this pins that they stay apart.
+   */
+  test("does not pad the editor panel like a page shell", async ({ page }) => {
+    await page.goto("/problems/two-sum-indices");
+    const padding = await page.evaluate(() => {
+      const el = document.querySelector(".code-workspace");
+      return el ? getComputedStyle(el).padding : "MISSING";
+    });
+    expect(padding).toBe("0px");
+  });
+
+  test("shows the topic map as two columns when there is room", async ({ page }) => {
+    await page.goto("/topics/lin_reg");
+    const sideBySide = await page.evaluate(() => {
+      const a = document.querySelector(".topic-overview")?.getBoundingClientRect();
+      const b = document.querySelector(".subtopic-cards")?.getBoundingClientRect();
+      return !!a && !!b && Math.abs(a.top - b.top) < 60 && b.left > a.right - 10;
+    });
+    expect(sideBySide, "overview and lesson list should sit side by side").toBe(true);
+  });
+});

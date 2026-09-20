@@ -1,4 +1,4 @@
-.problem-detail { max-width: 1120px; margin: 0 auto; padding: 22px clamp(20px, 4vw, 56px) 64px; }
+.problem-detail { max-width: var(--page-max); margin: 0 auto; padding: 22px clamp(20px, 4vw, 56px) 64px; }
 
 .problem-head { margin: 10px 0 22px; }
 .problem-head h1 { margin: 0 0 11px; font-size: 32px; letter-spacing: -.03em; line-height: 1.2; }
@@ -9,6 +9,7 @@
 .problem-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(20px, 3vw, 38px); align-items: start; }
 
 .problem-prompt { color:var(--ink-2); font-size: 15px; line-height: 1.7; }
+.problem-prompt p, .problem-prompt ul, .problem-prompt ol { max-width: 68ch; }
 .problem-prompt p { margin: 0 0 13px; }
 .problem-prompt code { font: .92em var(--font-mono); background:var(--brand-surface); padding: 2px 5px; border-radius: 3px; color:var(--ink); }
 .problem-prompt strong { color:var(--ink-2); }
@@ -37,8 +38,15 @@
   .problem-tests { overflow-x: auto; }
 }
 
+/* The extra width on a wide screen goes to the editor, not the prompt: the
+   prompt is read once and the editor is worked in. Below this the split is
+   even, because a narrower editor still has to show a line of code. */
+@media (min-width: 1360px) {
+  .problem-body { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.3fr); }
+}
+
 /* --- workspace ---------------------------------------------------------- */
-.workspace { min-width: 0; border:1px solid var(--line); border-radius: 12px; background:var(--surface); overflow: hidden; }
+.code-workspace { min-width: 0; border:1px solid var(--line); border-radius: 12px; background:var(--surface); overflow: hidden; }
 .workspace-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 9px 11px; border-bottom:1px solid var(--brand-line); background:var(--surface-2); }
 
 .lang-switch { display: inline-flex; padding: 3px; border:1px solid var(--brand-line); border-radius: 9px; background:var(--surface); }

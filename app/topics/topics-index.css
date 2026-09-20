@@ -1,4 +1,4 @@
-.topics-index { max-width: 1240px; margin: 0 auto; padding: 30px clamp(20px, 4vw, 56px) 70px; }
+.topics-index { max-width: var(--page-max); margin: 0 auto; padding: 30px clamp(20px, 4vw, 56px) 70px; }
 .topics-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 8px; }
 .topics-heading h1 { margin: 0 0 7px; font-size: 34px; letter-spacing: -.03em; }
 .topics-heading .heading-copy { margin: 0; max-width: 66ch; color:var(--ink-3); font-size: 14px; line-height: 1.6; }
@@ -30,3 +30,5 @@
   .topics-heading { flex-direction: column; align-items: flex-start; }
   .topics-heading h1 { font-size: 27px; }
 }
+
+@media (min-width: 1500px) { .topics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

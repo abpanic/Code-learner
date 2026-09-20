@@ -1,4 +1,4 @@
-.dashboard { max-width: 1240px; margin: 0 auto; padding: 30px clamp(20px, 4vw, 56px) 70px; }
+.dashboard { max-width: var(--page-max); margin: 0 auto; padding: 30px clamp(20px, 4vw, 56px) 70px; }
 
 .dash-hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 26px; margin-bottom: 22px; }
 .dash-hero h1 { margin: 0 0 8px; font-size: 34px; letter-spacing: -.03em; line-height: 1.15; }
@@ -69,3 +69,5 @@
   .dash-hero-actions > * { flex: 1; }
   .dash-tiles, .dash-domains { grid-template-columns: minmax(0, 1fr); }
 }
+
+@media (min-width: 1500px) { .dash-domains { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
