@@ -44,7 +44,8 @@ the vinext + Vite + Cloudflare Workers layer the project started on.
 
 **Already fixed (this pass):**
 
-- `.openai/hosting.json` added — the repo previously could not build from a clean clone.
+- The clean-clone build failure is gone (the missing `.openai/hosting.json` was patched,
+  then removed outright with the Cloudflare layer in Phase 0).
 - `pnpm lint` passes (was 3 errors).
 - Progress store extracted to `lib/progress.ts` — one evidence ladder, one storage key,
   `useSyncExternalStore` instead of `setState`-in-effect, cross-tab sync for free.
@@ -56,8 +57,8 @@ the vinext + Vite + Cloudflare Workers layer the project started on.
 > Drizzle was removed as *dead D1 scaffolding*. Phase 4 reintroduces it deliberately
 > against Neon Postgres — that is a different dependency set, not a reversal.
 
-**Still open from the review:** nothing is committed to git except `LICENSE`; there are no
-tests and no CI; the site is light-mode only; `topics.json` carries an unused `status` field.
+**Still open from the review:** there are no tests and no CI; the site is light-mode only;
+`topics.json` carries an unused `status` field.
 
 ---
 
