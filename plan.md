@@ -6,7 +6,8 @@ tests. Theory, explanation and "learn more" are **links only**, and every one of
 as the literal token `<placeholder>` until real URLs are chosen.
 
 Audience: whoever picks up this repo next (you, or a collaborator).
-Status: **Phases 0-3 complete.** Phase 4 (accounts, optional) and Phase 5 (polish) remain.
+Status: **Phases 0-3 complete, plus CI.** Phase 4 (accounts, optional) and Phase 5 (polish)
+remain.
 
 ---
 
@@ -57,8 +58,8 @@ the vinext + Vite + Cloudflare Workers layer the project started on.
 > Drizzle was removed as *dead D1 scaffolding*. Phase 4 reintroduces it deliberately
 > against Neon Postgres — that is a different dependency set, not a reversal.
 
-**Still open from the review:** there are no tests and no CI; the site is light-mode only;
-`topics.json` carries an unused `status` field.
+**Still open from the review:** the site is light-mode only, and `topics.json` carries an
+unused `status` field. Tests and CI are now in place.
 
 ---
 
@@ -368,9 +369,8 @@ Nothing exists today. Minimum worth having:
   100% of its own tests. This catches broken test data at build time and is the single
   highest-value test in the project.
 - **Playwright smoke** — done in Phase 2 (`pnpm e2e`); uses the locally installed Chrome.
-- **GitHub Actions** on push/PR: `pnpm install --frozen-lockfile && pnpm lint && npx tsc
-  --noEmit && pnpm test && pnpm build`. The two blocking bugs found in review would both
-  have been caught by this.
+- **GitHub Actions** — done. `.github/workflows/ci.yml` runs install, lint, typecheck, unit
+  tests, build and the e2e suite on push, PR and on demand.
 
 ---
 
