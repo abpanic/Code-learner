@@ -1,5 +1,7 @@
 # Principal AI/ML Competency Matrix
 
+[![CI](https://github.com/abpanic/Code-learner/actions/workflows/ci.yml/badge.svg)](https://github.com/abpanic/Code-learner/actions/workflows/ci.yml)
+
 A Next.js/React tracker covering 70 topics, eight role profiles, domain and level filters,
 a six-month starter roadmap, browser-local progress, and Jupyter notebook previews.
 
@@ -38,10 +40,34 @@ pnpm start      # serve the production build locally
 | `pnpm start` | `next start` against the built output |
 | `pnpm lint` | ESLint over the whole repo |
 | `pnpm typecheck` | `tsc --noEmit` |
+| `pnpm test` | Vitest unit tests |
+| `pnpm e2e` | Playwright smoke tests (needs `pnpm build` first) |
 
 `pnpm dev` and `pnpm build` both run `scripts/build-notebook-manifest.mjs` first. It
 validates that every notebook under `public/notebooks` matches a topic ID and refreshes
 `data/notebooks.json`, failing the build if a notebook is malformed or orphaned.
+
+## Tests
+
+```sh
+pnpm test    # unit
+pnpm build && pnpm e2e    # browser smoke tests
+```
+
+`pnpm test` covers the pure modules plus two things worth knowing about:
+
+- Every reference solution is run against its own test table, in both languages, and each
+  starter is asserted to fail. That is what catches a wrong `expected` value at author time.
+- The Python harness is driven against real CPython-in-WASM. It reads the harness source out
+  of `public/runner-worker.js` rather than copying it, so the test fails if the two drift.
+
+`pnpm e2e` drives a real browser: solving a problem end to end, the 10-second watchdog on a
+runaway loop, and the dashboard against a seeded store. It uses the locally installed Chrome
+by default, so no browser download is needed; set `PLAYWRIGHT_CHANNEL=""` to use Playwright's
+own Chromium instead. Playwright starts the production server itself and reuses one that is
+already running.
+
+CI runs lint, typecheck, unit tests, build and the e2e suite on every push and pull request.
 
 ## Deploying
 
