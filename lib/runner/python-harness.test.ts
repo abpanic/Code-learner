@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
 import { loadPyodide, type PyodideInterface } from "pyodide";
 import { problems } from "@/data/problems";
+import { lessons } from "@/data/lessons";
 import { toleranceFor } from "@/data/problems/types";
 import { findMismatch } from "./compare";
 
@@ -124,4 +125,31 @@ describe("every Python reference solution passes its own tests", () => {
       });
     },
   );
+});
+
+/**
+ * Lesson snippets are presented as runnable, so at minimum they must parse as
+ * Python. Compiling in Pyodide catches a typo or a broken f-string without
+ * needing numpy and scikit-learn installed.
+ */
+describe("every lesson snippet is valid Python", () => {
+  const snippets = lessons.flatMap((lesson) =>
+    lesson.subtopics.flatMap((subtopic) => [
+      [`${lesson.topicId}/${subtopic.id}`, subtopic.code.body] as const,
+      ...(subtopic.code.variation
+        ? [[`${lesson.topicId}/${subtopic.id} (variation)`, subtopic.code.variation.body] as const]
+        : []),
+    ]),
+  );
+
+  it.each(snippets)("%s", (_name, source) => {
+    const globals = pyodide.globals.get("dict")();
+    try {
+      globals.set("__source", source);
+      // compile() parses without executing, so no third-party imports are needed.
+      pyodide.runPython("compile(__source, '<lesson>', 'exec')", { globals });
+    } finally {
+      globals.destroy();
+    }
+  });
 });

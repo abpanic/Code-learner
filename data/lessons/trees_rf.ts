@@ -92,6 +92,33 @@ fold. Knowing which your library does is worth the five minutes it takes to chec
           },
         },
       ],
+      code: {
+        caption: "Fit a one-split tree and read the impurity numbers it chose.",
+        body: `import numpy as np
+from sklearn.tree import DecisionTreeClassifier, export_text
+
+X = np.array([[1], [2], [3], [6], [7], [8]])
+y = np.array([0, 0, 0, 1, 1, 1])
+
+tree = DecisionTreeClassifier(max_depth=1).fit(X, y)
+print(export_text(tree, feature_names=["x"]))
+
+def gini(labels):
+    _, counts = np.unique(labels, return_counts=True)
+    return 1 - ((counts / counts.sum()) ** 2).sum()
+
+parent = gini(y)
+for threshold in [2.5, 4.5]:
+    left, right = y[X.ravel() < threshold], y[X.ravel() >= threshold]
+    weighted = (len(left) * gini(left) + len(right) * gini(right)) / len(y)
+    print(f"split at {threshold}: gain = {parent - weighted:.3f}")`,
+        caveats: [
+          "The gain is weighted by how many rows land in each child. An unweighted average would rate a split producing one tiny pure leaf as highly as a real separation.",
+          "The search is greedy with no lookahead, so exclusive-or style structure gives zero first-split gain and is missed entirely.",
+          "A high-cardinality column offers many split points, so some split will separate the training labels by chance. A user ID will look like the best feature you have.",
+          "Gini and entropy rarely pick different splits. Choosing between them is not where your tuning time goes.",
+        ],
+      },
       questions: [
         {
           question: "Why weight child impurity by sample count?",
@@ -161,6 +188,35 @@ it. It is the reason averaging exists, and the subject of the next lesson.`,
           },
         },
       ],
+      code: {
+        caption: "Watch train and validation diverge as depth grows, then prune instead.",
+        body: `import numpy as np
+from sklearn.datasets import load_breast_cancer
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import cross_val_score
+
+X, y = load_breast_cancer(return_X_y=True)
+
+for depth in [1, 3, 5, None]:
+    tree = DecisionTreeClassifier(max_depth=depth, random_state=0)
+    cv = cross_val_score(tree, X, y, cv=5).mean()
+    tree.fit(X, y)
+    label = str(depth) if depth else "none"
+    print(f"depth={label:>4}  train={tree.score(X, y):.3f}  cv={cv:.3f}  "
+          f"leaves={tree.get_n_leaves()}")
+
+# Cost-complexity pruning: grow fully, then cut back by alpha.
+path = DecisionTreeClassifier(random_state=0).cost_complexity_pruning_path(X, y)
+for alpha in path.ccp_alphas[::max(1, len(path.ccp_alphas) // 4)][:4]:
+    pruned = DecisionTreeClassifier(ccp_alpha=alpha, random_state=0)
+    print(f"alpha={alpha:.4f}  cv={cross_val_score(pruned, X, y, cv=5).mean():.3f}")`,
+        caveats: [
+          "An unconstrained tree reaches 1.000 on training data by giving almost every row its own leaf. Perfect training accuracy is the symptom, not the achievement.",
+          "min_samples_leaf usually generalises better than max_depth, because it responds to how much data supports a region rather than how deep it happens to sit.",
+          "Pruning beats early stopping when a low-gain split enables a valuable one beneath it — greedy stopping never gets to see that.",
+          "Even a pruned tree is unstable. Refit on a bootstrap sample; if the top split moves, do not read the structure as an explanation.",
+        ],
+      },
       questions: [
         {
           question: "A tree scores 100% on training data and 71% on validation. What is happening?",
@@ -234,6 +290,36 @@ are famously forgiving here; defaults are usually close, and the gains from tuni
 compared with what the same effort spent on features would return.`,
         },
       ],
+      code: {
+        caption: "Compare a single tree, bagging, and a forest, using the free out-of-bag estimate.",
+        body: `import numpy as np
+from sklearn.datasets import load_breast_cancer
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import cross_val_score
+
+X, y = load_breast_cancer(return_X_y=True)
+deep = DecisionTreeClassifier(random_state=0)
+
+print(f"single tree : {cross_val_score(deep, X, y, cv=5).mean():.3f}")
+bag = BaggingClassifier(deep, n_estimators=100, random_state=0)
+print(f"bagging     : {cross_val_score(bag, X, y, cv=5).mean():.3f}")
+
+forest = RandomForestClassifier(n_estimators=100, oob_score=True, random_state=0)
+forest.fit(X, y)
+print(f"forest      : {cross_val_score(forest, X, y, cv=5).mean():.3f}")
+print(f"forest oob  : {forest.oob_score_:.3f}")
+
+for n in [1, 5, 25, 100, 300]:
+    f = RandomForestClassifier(n_estimators=n, oob_score=True, random_state=0).fit(X, y)
+    print(f"n={n:4}  oob={f.oob_score_:.3f}")`,
+        caveats: [
+          "The oob curve flattens rather than turning back up. More trees never overfits a forest — depth does.",
+          "Feature sampling makes each individual tree worse and the ensemble better. Lower correlation beats lower individual error when you are averaging.",
+          "Bagging shallow trees barely helps. Averaging repairs variance, and a shallow tree's problem is bias.",
+          "The oob estimate inherits any leakage in the row structure. Grouped or time-ordered data makes it optimistic exactly as a random split would.",
+        ],
+      },
       questions: [
         {
           question: "Why sample features at each split rather than once per tree?",
@@ -307,6 +393,39 @@ objectivity that invites exactly this misreading.`,
           },
         },
       ],
+      code: {
+        caption: "Compare built-in importance with permutation importance, including on a decoy.",
+        body: `import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.inspection import permutation_importance
+from sklearn.model_selection import train_test_split
+
+rng = np.random.default_rng(0)
+n = 500
+signal = rng.normal(size=n)
+X = np.column_stack([
+    signal,                                 # 0: real signal
+    signal + rng.normal(scale=0.1, size=n), # 1: near-duplicate of it
+    rng.normal(size=n),                     # 2: pure noise
+    rng.integers(0, n, size=n),             # 3: unique id, pure noise
+])
+y = (signal > 0).astype(int)
+
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, random_state=0)
+forest = RandomForestClassifier(n_estimators=200, random_state=0).fit(X_tr, y_tr)
+
+names = ["signal", "duplicate", "noise", "unique_id"]
+perm = permutation_importance(forest, X_te, y_te, n_repeats=10, random_state=0)
+for i, name in enumerate(names):
+    print(f"{name:10} impurity={forest.feature_importances_[i]:.3f}  "
+          f"permutation={perm.importances_mean[i]:+.3f}")`,
+        caveats: [
+          "unique_id is pure noise and still scores on impurity importance, because a column with 500 distinct values offers 499 chances to split the training labels by luck.",
+          "signal and duplicate both show low permutation importance. Shuffling one leaves the other to carry the same information — that is redundancy, not irrelevance.",
+          "Permute correlated features as a group, or cluster first and report per cluster, or you will conclude that nothing matters.",
+          "Importance says what the model leaned on. It does not say what causes the outcome, and a feature that is a consequence of the target will dominate — which is what leakage looks like.",
+        ],
+      },
       questions: [
         {
           question: "Why can a random ID column rank as important?",

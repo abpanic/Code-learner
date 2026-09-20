@@ -145,3 +145,22 @@ test("a migrated lesson renders its content", async ({ page }) => {
   await expect(page.locator(".link-slot-empty")).toHaveCount(3);
   await expect(page.locator(".practice-list > div")).toHaveCount(2);
 });
+
+test("every lesson shows runnable code with its caveats", async ({ page }) => {
+  await page.goto("/topics/lin_reg/ols-fit");
+
+  const snippet = page.locator(".lesson-snippet").first();
+  await expect(snippet).toContainText("from sklearn.linear_model import LinearRegression");
+  await expect(snippet).toContainText("train_test_split");
+  await expect(snippet).toContainText("r2_score");
+
+  // The caveats are the part readers get bitten by, so they sit with the code.
+  await expect(page.locator(".code-caveats li")).toHaveCount(4);
+  await expect(page.locator(".code-caveats")).toContainText("intercept");
+
+  // A variation is offered where one is worth knowing.
+  await expect(page.locator(".code-variation .lesson-snippet")).toContainText("X_multi");
+
+  // "In code" is in the table of contents alongside the prose sections.
+  await expect(page.locator(".lesson-side-card")).toContainText("In code");
+});

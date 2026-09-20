@@ -86,6 +86,35 @@ This is why a model's last layer often looks bare in the code, and why applying 
 a loss that already includes one is a quiet, common bug.`,
         },
       ],
+      code: {
+        caption: "A two-layer forward pass in numpy, with the shapes printed at each step.",
+        body: `import numpy as np
+
+rng = np.random.default_rng(0)
+batch, d_in, hidden, d_out = 4, 5, 3, 2
+
+X = rng.normal(size=(batch, d_in))
+W1, b1 = rng.normal(size=(d_in, hidden)) * 0.5, np.zeros(hidden)
+W2, b2 = rng.normal(size=(hidden, d_out)) * 0.5, np.zeros(d_out)
+
+z1 = X @ W1 + b1
+h1 = np.maximum(0, z1)          # ReLU
+z2 = h1 @ W2 + b2               # no activation: these are logits
+
+print("X ", X.shape, "-> z1", z1.shape, "-> z2", z2.shape)
+print("parameters:", W1.size + b1.size + W2.size + b2.size)
+
+# Without the ReLU the whole stack collapses to one linear map.
+collapsed = X @ (W1 @ W2) + (b1 @ W2 + b2)
+linear_only = (X @ W1 + b1) @ W2 + b2
+print("two linear layers == one:", np.allclose(collapsed, linear_only))`,
+        caveats: [
+          "Remove the nonlinearity and ten layers have exactly the expressive power of one, as the last two lines show. The activation is the entire reason depth buys anything.",
+          "Shape errors are the most common bug in a hand-written model. Print shapes at every step while building.",
+          "The final layer produces logits, not probabilities. Frameworks fold the softmax into the loss for numerical stability, so applying one yourself applies it twice.",
+          "Weight scale at initialisation decides whether activations saturate or decay. A model producing NaN in its first steps is usually badly initialised rather than badly designed.",
+        ],
+      },
       questions: [
         {
           question: "What happens to a ten-layer network with no activation functions?",
@@ -166,6 +195,43 @@ that breaks the chain — detaching a tensor, a non-differentiable operation, co
 array — silently stops gradients flowing through that path.`,
         },
       ],
+      code: {
+        caption: "Backpropagate one neuron by hand, then verify every gradient numerically.",
+        body: `import numpy as np
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+x, w, b, y = 2.0, 0.5, 0.0, 1.0
+
+# forward
+z = w * x + b
+a = sigmoid(z)
+loss = 0.5 * (a - y) ** 2
+
+# backward, one factor at a time
+dL_da = a - y
+da_dz = a * (1 - a)
+dL_dz = dL_da * da_dz
+dL_dw = dL_dz * x        # the input reappears here, and only here
+dL_db = dL_dz * 1.0
+
+print(f"z={z:.4f} a={a:.4f} loss={loss:.6f}")
+print(f"dL/dw={dL_dw:+.6f}  dL/db={dL_db:+.6f}")
+
+def loss_at(w_, b_):
+    return 0.5 * (sigmoid(w_ * x + b_) - y) ** 2
+
+eps = 1e-6
+print(f"numeric dL/dw={(loss_at(w + eps, b) - loss_at(w - eps, b)) / (2 * eps):+.6f}")
+print(f"numeric dL/db={(loss_at(w, b + eps) - loss_at(w, b - eps)) / (2 * eps):+.6f}")`,
+        caveats: [
+          "The input appears in the weight gradient and not in the bias gradient. A feature that is always zero therefore never updates its weight, however wrong the prediction.",
+          "Sigmoid's derivative peaks at 0.25, so ten stacked sigmoid layers multiply ten factors below 0.25 and the first layer stops learning. That is the vanishing gradient.",
+          "Loss flat from step one points at vanishing gradients; loss falling then going NaN points at exploding ones. The symptom tells you which fix applies.",
+          "Anything that breaks the chain — detaching a tensor, converting to a plain array, a non-differentiable op — silently stops gradients with no error raised.",
+        ],
+      },
       questions: [
         {
           question: "Where does the input x appear in the weight gradient?",
@@ -239,6 +305,39 @@ training code.`,
           },
         },
       ],
+      code: {
+        caption: "Measure activation variance through a deep stack under three initialisations.",
+        body: `import numpy as np
+
+rng = np.random.default_rng(0)
+width, depth, batch = 128, 12, 256
+
+def propagate(scale_fn, label):
+    h = rng.normal(size=(batch, width))
+    variances = []
+    for _ in range(depth):
+        W = rng.normal(size=(width, width)) * scale_fn(width)
+        h = np.maximum(0, h @ W)
+        variances.append(h.var())
+    shown = [f"{v:.2e}" for v in variances[::4]]
+    print(f"{label:12} {' '.join(shown)}")
+
+print("layer variance every 4 layers (start ~1.0)")
+propagate(lambda n: 0.01, "too small")            # signal dies
+propagate(lambda n: 0.1, "too large")             # signal explodes
+propagate(lambda n: np.sqrt(2.0 / n), "He init")  # stays put
+
+# All-zero weights: every unit computes the same thing forever.
+W = np.zeros((width, width))
+h = np.maximum(0, rng.normal(size=(batch, width)) @ W)
+print("zero init, distinct column values:", len(np.unique(h)))`,
+        caveats: [
+          "Too small and the signal decays to nothing by layer 12; too large and it explodes. He initialisation holds variance roughly constant through ReLU layers.",
+          "Zero initialisation makes every unit in a layer identical and keeps them identical, since they receive identical gradients. The layer has the power of one unit.",
+          "A dead ReLU unit — always negative input — has zero gradient forever and never recovers. Leaky ReLU keeps a small slope so there is always something to learn from.",
+          "L2 inside Adam is not weight decay: Adam rescales every gradient component including the penalty's, so the pull toward zero is uneven. AdamW decouples it.",
+        ],
+      },
       questions: [
         {
           question: "Why can't you initialise all weights to zero?",
@@ -309,6 +408,42 @@ the loss curve. Set a seed and record it, so that when a run behaves strangely y
 whether it reproduces.`,
         },
       ],
+      code: {
+        caption: "The tiny-batch overfit check: the highest-value test before any real run.",
+        body: `import numpy as np
+
+rng = np.random.default_rng(0)
+X = rng.normal(size=(8, 4))          # eight examples is the whole point
+y = (X[:, 0] > 0).astype(float).reshape(-1, 1)
+
+W1, b1 = rng.normal(size=(4, 16)) * np.sqrt(2 / 4), np.zeros(16)
+W2, b2 = rng.normal(size=(16, 1)) * np.sqrt(2 / 16), np.zeros(1)
+lr = 0.1
+
+for step in range(301):
+    z1 = X @ W1 + b1
+    h1 = np.maximum(0, z1)
+    p = 1 / (1 + np.exp(-(h1 @ W2 + b2)))
+    loss = -np.mean(y * np.log(p + 1e-12) + (1 - y) * np.log(1 - p + 1e-12))
+
+    dz2 = (p - y) / len(y)                  # gradients start here
+    dW2, db2 = h1.T @ dz2, dz2.sum(0)
+    dh1 = dz2 @ W2.T
+    dz1 = dh1 * (z1 > 0)                    # ReLU passes gradient only where active
+    dW1, db1 = X.T @ dz1, dz1.sum(0)
+
+    for param, grad in ((W1, dW1), (b1, db1), (W2, dW2), (b2, db2)):
+        param -= lr * grad
+
+    if step % 100 == 0:
+        print(f"step {step:3}  loss={loss:.5f}")`,
+        caveats: [
+          "If the loss does not reach near zero on eight examples, you have a bug, not a tuning problem. Misaligned labels, a loss on the wrong axis, or gradients not reaching the parameters.",
+          "Frameworks accumulate gradients by default, so a real loop must zero them each step. Forgetting produces silent divergence with no error message.",
+          "Learning rate dominates every other hyperparameter. Find a workable range before touching architecture.",
+          "Batch norm and dropout behave differently in training and evaluation. A model that is right while training and wrong at inference is usually left in the wrong mode.",
+        ],
+      },
       questions: [
         {
           question: "What does a failed tiny-batch overfit suggest?",

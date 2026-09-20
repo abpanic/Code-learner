@@ -4,6 +4,7 @@ import {
   LIMITS,
   countWords,
   estimateMinutes,
+  codeLines,
   readingLoad,
   subtopicWords,
   type Subtopic,
@@ -107,6 +108,20 @@ function checkSubtopic(lesson: TopicLesson, subtopic: Subtopic, errors: string[]
     } else if (!problemTopics.get(slug)?.includes(lesson.topicId)) {
       errors.push(`${where}: problem "${slug}" is not listed under this topic`);
     }
+  }
+
+  // Code first: a lesson without a runnable snippet is not finished.
+  if (!subtopic.code.body.trim()) errors.push(`${where}: code.body is empty`);
+  if (!subtopic.code.caption.trim()) errors.push(`${where}: code.caption is empty`);
+  if (subtopic.code.caveats.length === 0) {
+    errors.push(`${where}: code needs at least one caveat — what breaks on real data?`);
+  }
+  const lines = codeLines(subtopic.code);
+  if (lines > LIMITS.subtopic.codeLines) {
+    errors.push(
+      `${where}: ${lines} lines of code exceeds ${LIMITS.subtopic.codeLines}`
+      + " — show the step, not the whole script",
+    );
   }
 
   for (const section of subtopic.sections) {

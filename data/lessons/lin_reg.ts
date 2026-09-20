@@ -99,6 +99,52 @@ actually serve the decision you are making. Those four disagree often enough to 
 checking separately.`,
         },
       ],
+      code: {
+        caption: "Fit a straight line to seven house sales, then score it on data it never saw.",
+        body: `import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+
+# [square footage] -> price in $1000s
+X = np.array([[650], [800], [1200], [1500], [2000], [2400], [2800]])
+y = np.array([150, 180, 240, 300, 380, 450, 520])
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+print(f"Slope:     {model.coef_[0]:.3f}")     # dollars per square foot
+print(f"Intercept: {model.intercept_:.1f}")   # price at 0 sq ft
+print(f"RMSE:      {mean_squared_error(y_test, y_pred) ** 0.5:.1f}")
+print(f"R2:        {r2_score(y_test, y_pred):.2f}")`,
+        caveats: [
+          "With seven rows, a 20% test split is one house. That R2 is one number from one sale \u2014 a demonstration of the API, not evidence about the model. At this size, cross-validation is the honest alternative.",
+          "The intercept is the price of a zero-square-foot house, which does not exist. An intercept often sits outside the range of the data and means nothing on its own.",
+          "One mansion priced in the millions would drag the line toward it, because squared error punishes the largest residual hardest. Plot the data before trusting the fit.",
+          "random_state=42 makes the split reproducible, not representative. Change the seed and the score moves \u2014 if that is unsettling, it should be.",
+        ],
+        variation: {
+          caption: "More than one feature: the same call, a wider X.",
+          body: `# [square footage, bedrooms]
+X_multi = np.array([
+    [650, 1], [800, 2], [1200, 2], [1500, 3],
+    [2000, 4], [2400, 4], [2800, 5],
+])
+
+model_multi = LinearRegression().fit(X_multi, y)
+print("Coefficients:", model_multi.coef_)   # one per feature
+print("Intercept:   ", model_multi.intercept_)
+
+# Read each coefficient as: change in price per unit of that feature,
+# holding the other included features fixed. Square footage and bedroom
+# count are strongly correlated here, so neither coefficient is stable.`,
+        },
+      },
       questions: [
         {
           question: "Why does adding a useless feature never increase training error?",
@@ -182,6 +228,54 @@ shrink further and training error rises; somewhere in the middle is the value th
 best, and only held-out data can tell you where.`,
         },
       ],
+      code: {
+        caption: "The same fit under three penalties, each inside a pipeline so scaling is fitted per fold.",
+        body: `import numpy as np
+from sklearn.linear_model import Ridge, Lasso, ElasticNet
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import cross_val_score
+
+X = np.array([[650, 1], [800, 2], [1200, 2], [1500, 3],
+              [2000, 4], [2400, 4], [2800, 5]])
+y = np.array([150, 180, 240, 300, 380, 450, 520])
+
+models = {
+    "ridge":   Ridge(alpha=1.0),
+    "lasso":   Lasso(alpha=1.0, max_iter=10000),
+    "elastic": ElasticNet(alpha=1.0, l1_ratio=0.5, max_iter=10000),
+}
+
+for name, estimator in models.items():
+    pipe = make_pipeline(StandardScaler(), estimator)
+    scores = cross_val_score(pipe, X, y, cv=3, scoring="r2")
+    pipe.fit(X, y)
+    print(f"{name:8} cv r2={scores.mean():5.2f}  "
+          f"coefs={np.round(pipe[-1].coef_, 2)}")`,
+        caveats: [
+          "Scaling is not optional. The penalty acts on coefficient size, and square footage runs in the thousands while bedrooms run in single digits \u2014 unscaled, the penalty punishes the bedroom coefficient for its units rather than its usefulness.",
+          "StandardScaler must sit inside the pipeline. Scaling the whole array first fits the mean and variance using rows that later serve as validation, which leaks and inflates the score.",
+          "alpha=1.0 is a placeholder, not a choice. Search it over a log-spaced range; the right value depends on the data and on how many features there are.",
+          "Lasso sending a coefficient to zero means the penalty outweighed its contribution at this alpha, on this sample. Among correlated features, which one survives can change with a different split.",
+        ],
+        variation: {
+          caption: "Let the search choose alpha instead of guessing it.",
+          body: `from sklearn.model_selection import GridSearchCV
+
+pipe = make_pipeline(StandardScaler(), Ridge())
+grid = GridSearchCV(
+    pipe,
+    {"ridge__alpha": [0.01, 0.1, 1.0, 10.0, 100.0]},
+    cv=3,
+    scoring="r2",
+)
+grid.fit(X, y)
+print(grid.best_params_, f"{grid.best_score_:.2f}")
+
+# best_score_ was selected on these folds, so it is optimistic.
+# Keep a test set the search never touched for the number you report.`,
+        },
+      },
       questions: [
         {
           question: "Why does L1 produce exact zeros when L2 does not?",
@@ -264,6 +358,44 @@ degree 2 on 10 features gives 65 terms — which is exactly the situation the ri
 the last lesson exists to handle.`,
         },
       ],
+      code: {
+        caption: "Fit a curve by expanding the features, keeping the same linear estimator.",
+        body: `import numpy as np
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.linear_model import Ridge
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import cross_val_score
+
+# Prices accelerating with size: a straight line will underfit.
+X = np.array([[650], [800], [1200], [1500], [2000], [2400], [2800]])
+y = np.array([150, 160, 210, 300, 450, 600, 850])
+
+for degree in [1, 2, 3, 6]:
+    pipe = make_pipeline(
+        PolynomialFeatures(degree=degree, include_bias=False),
+        StandardScaler(),
+        Ridge(alpha=1.0),
+    )
+    cv = cross_val_score(pipe, X, y, cv=3, scoring="r2").mean()
+    pipe.fit(X, y)
+    print(f"degree {degree}: cv r2={cv:6.2f}   train r2={pipe.score(X, y):.3f}")`,
+        caveats: [
+          "Watch the two columns diverge. Training R2 climbs with every degree while cross-validated R2 peaks then collapses \u2014 that gap is overfitting, made visible.",
+          "Expansion happens before scaling, for a reason: 2800 squared is 7,840,000, so the squared column dwarfs the linear one until it is standardised.",
+          "Degree 2 on 10 features gives 65 columns; degree 3 gives 285. The count grows fast enough that regularisation stops being optional.",
+          "Extrapolating a polynomial is close to meaningless. A cubic fitted to houses up to 2800 sq ft will predict something confident and absurd at 5000.",
+        ],
+        variation: {
+          caption: "Interactions only, when you want products without powers.",
+          body: `poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
+print(poly.fit_transform(np.array([[1500, 3]])))
+# [[1500, 3, 4500]] -> sq_ft, bedrooms, sq_ft x bedrooms
+
+# The product says the effect of size depends on bedroom count.
+# Keep both main effects: dropping sq_ft while keeping the product
+# asserts that size has exactly zero effect at zero bedrooms.`,
+        },
+      },
       questions: [
         {
           question: "Why is a quadratic fit still called a linear model?",
@@ -345,6 +477,35 @@ design — randomisation, a natural experiment, a defensible identification stra
 from the fit statistics.`,
         },
       ],
+      code: {
+        caption: "Check the fit rather than the score: residual structure first, then stability across folds.",
+        body: `import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import cross_validate, KFold
+
+X = np.array([[650], [800], [1200], [1500], [2000], [2400], [2800]])
+y = np.array([150, 160, 210, 300, 450, 600, 850])
+
+model = LinearRegression().fit(X, y)
+residuals = y - model.predict(X)
+
+# Structure in the residuals means the model missed something systematic.
+for sq_ft, r in zip(X.ravel(), residuals):
+    print(f"{sq_ft:5} {r:+7.1f} {'#' * int(abs(r) / 5)}")
+
+cv = cross_validate(
+    model, X, y, cv=KFold(3, shuffle=True, random_state=0),
+    scoring=["r2", "neg_root_mean_squared_error"],
+)
+print("r2 per fold:  ", np.round(cv["test_r2"], 2))
+print("rmse per fold:", np.round(-cv["test_neg_root_mean_squared_error"], 1))`,
+        caveats: [
+          "Those residuals are not noise. They are negative at both ends and positive in the middle \u2014 the signature of fitting a line to a curve. No score reports this; the plot does.",
+          "R2 varying widely across folds means the estimate is unstable, and the average alone hides that. Report the spread.",
+          "shuffle=True is wrong for time-ordered rows and for repeated measurements of the same entity. Use TimeSeriesSplit or GroupKFold, or the model trains on the future.",
+          "None of this can test exogeneity. Whether an omitted influence correlates with your features is a question about how the data was collected, and no residual plot answers it.",
+        ],
+      },
       questions: [
         {
           question: "Residuals fan out as fitted values grow. What does that change?",

@@ -75,6 +75,34 @@ change depending on where you start.`,
           },
         },
       ],
+      code: {
+        caption: "Fit a classifier, then read its coefficients as odds ratios.",
+        body: `import numpy as np
+from sklearn.linear_model import LogisticRegression
+
+# [hours studied, prior attempts] -> passed
+X = np.array([[1, 0], [2, 0], [3, 1], [4, 1], [5, 2], [6, 2], [7, 3], [8, 3]])
+y = np.array([0, 0, 0, 1, 1, 1, 1, 1])
+
+model = LogisticRegression().fit(X, y)
+
+print("coefficients:", np.round(model.coef_[0], 3))
+print("odds ratios: ", np.round(np.exp(model.coef_[0]), 3))
+
+# The score, the probability, and the decision are three different things.
+z = model.decision_function(X[:3])
+p = model.predict_proba(X[:3])[:, 1]
+print("score:      ", np.round(z, 3))
+print("probability:", np.round(p, 3))
+print("prediction: ", model.predict(X[:3]))
+print("sigmoid check:", np.round(1 / (1 + np.exp(-z)), 3))`,
+        caveats: [
+          "An odds ratio of 2.0 doubles the odds, not the probability. Moving 0.1 to 0.18 and 0.5 to 0.67 are the same odds ratio.",
+          "predict() applies a 0.5 cutoff silently. If that is not the threshold you want, use predict_proba and apply your own.",
+          "Coefficients are only comparable across features if the features are on comparable scales. Standardise before reading them side by side.",
+          "Perfectly separable data has no finite optimum. scikit-learn regularises by default, which quietly hides this — set penalty=None and it will warn about convergence.",
+        ],
+      },
       questions: [
         {
           question: "Why is the sigmoid preferred to simply clipping a linear prediction to [0, 1]?",
@@ -117,7 +145,7 @@ sigmoid's derivative $p(1-p)$ cancels against a matching term from the log, leav
 
 $$\frac{\partial L}{\partial z_i} = \frac{p_i - y_i}{n}$$
 
-and therefore $\nabla_w L = X^{\mathsf T}(p - y)/n$. The update depends only on how far each
+and therefore $\\nabla_w L = X^{\mathsf T}(p - y)/n$. The update depends only on how far each
 predicted probability is from its label. This cancellation is not a coincidence: it is what
 makes cross-entropy the natural partner for the sigmoid, and pairing the sigmoid with squared
 loss instead reintroduces a $p(1-p)$ factor that stalls learning when the model is confidently
@@ -148,6 +176,40 @@ penalty on the weights keeps the solution finite. As with linear regression, lea
 intercept unpenalised.`,
         },
       ],
+      code: {
+        caption: "Compute the loss by hand, then confirm the gradient formula against the library.",
+        body: `import numpy as np
+from sklearn.metrics import log_loss
+
+y = np.array([1, 0, 1, 1])
+p = np.array([0.9, 0.2, 0.6, 0.3])
+
+manual = -np.mean(y * np.log(p) + (1 - y) * np.log(1 - p))
+print(f"manual:  {manual:.6f}")
+print(f"sklearn: {log_loss(y, p):.6f}")
+
+# The gradient is just (p - y), averaged. Check it numerically.
+X = np.array([[1.0], [2.0], [3.0], [4.0]])
+w = np.array([0.5])
+
+def loss(weights):
+    z = X @ weights
+    probs = 1 / (1 + np.exp(-z))
+    return -np.mean(y * np.log(probs) + (1 - y) * np.log(1 - probs))
+
+probs = 1 / (1 + np.exp(-(X @ w)))
+analytic = X.T @ (probs - y) / len(y)
+
+eps = 1e-6
+numeric = (loss(w + eps) - loss(w - eps)) / (2 * eps)
+print(f"analytic {analytic[0]:.6f}  numeric {numeric:.6f}")`,
+        caveats: [
+          "A predicted probability of exactly 0 or 1 makes the loss infinite. Libraries clip into roughly [1e-15, 1-1e-15] before taking the log.",
+          "Computing the probability and then its log loses precision. Production implementations work from the score directly with a log-sum-exp formulation.",
+          "The finite-difference check above is the fastest way to catch a wrong gradient in code you wrote yourself. Use it whenever you implement a derivative.",
+          "log_loss expects probabilities, not scores. Passing decision_function output gives a number that looks plausible and means nothing.",
+        ],
+      },
       questions: [
         {
           question: "Why is the gradient proportional to p − y?",
@@ -218,6 +280,35 @@ depends on them. Often the cleaner path is to fit on the real distribution and m
 threshold, which changes the decision without disturbing the estimate.`,
         },
       ],
+      code: {
+        caption: "Sweep the threshold and pick the one that minimises your actual cost.",
+        body: `import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, precision_recall_curve
+
+rng = np.random.default_rng(0)
+X = rng.normal(size=(400, 3))
+y = (X[:, 0] + rng.normal(scale=0.8, size=400) > 1.2).astype(int)  # ~12% positive
+
+model = LogisticRegression().fit(X, y)
+p = model.predict_proba(X)[:, 1]
+
+COST_FN, COST_FP = 10.0, 1.0   # missing a case costs ten investigations
+
+for t in [0.1, 0.3, 0.5, 0.7]:
+    tn, fp, fn, tp = confusion_matrix(y, p >= t).ravel()
+    cost = fn * COST_FN + fp * COST_FP
+    print(f"t={t:.1f}  tp={tp:3} fp={fp:3} fn={fn:3}  cost={cost:7.1f}")
+
+precision, recall, thresholds = precision_recall_curve(y, p)
+print(f"\\nbase rate {y.mean():.2%} — accuracy of always-negative: {1 - y.mean():.2%}")`,
+        caveats: [
+          "The best threshold here is nowhere near 0.5, because the costs are not symmetric. The default cutoff encodes an assumption you probably did not make.",
+          "Always-negative scores 88% accuracy on this data and catches nothing. Whenever positives are rare, accuracy measures the base rate rather than the model.",
+          "Pick the threshold on validation data, then measure the locked rule on a test set. Choosing and reporting on the same split is selection, not evaluation.",
+          "Report the threshold with any precision or recall figure. Without it the number cannot be reproduced or compared.",
+        ],
+      },
       questions: [
         {
           question: "When would you move the threshold away from 0.5?",
@@ -276,6 +367,34 @@ the class minimising expected cost. Calibration matters more here too, because t
 is now between several estimated numbers rather than one against a fixed cutoff.`,
         },
       ],
+      code: {
+        caption: "Multinomial against one-vs-rest on the same three-class data.",
+        body: `import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.linear_model import LogisticRegression
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.model_selection import cross_val_score
+
+X, y = load_iris(return_X_y=True)
+
+multinomial = LogisticRegression(max_iter=1000)
+ovr = OneVsRestClassifier(LogisticRegression(max_iter=1000))
+
+for name, model in [("multinomial", multinomial), ("one-vs-rest", ovr)]:
+    score = cross_val_score(model, X, y, cv=5).mean()
+    model.fit(X, y)
+    probs = model.predict_proba(X[:1])[0]
+    print(f"{name:12} cv={score:.3f}  probs={np.round(probs, 3)}  sum={probs.sum():.3f}")
+
+# Softmax probabilities are forced to sum to 1; independent binary models
+# are normalised after the fact, which is not the same thing.`,
+        caveats: [
+          "Softmax makes the classes compete: evidence for one suppresses the others. That is wrong when an item can genuinely have several labels at once.",
+          "For multi-label problems use independent binary classifiers with their own thresholds, not softmax with an argmax.",
+          "Taking the highest probability is only the cost-minimising rule when every confusion costs the same. Build the cost matrix if they do not.",
+          "Calibration matters more here, because the decision compares several estimated numbers rather than one against a fixed cutoff.",
+        ],
+      },
       questions: [
         {
           question: "Why does softmax with two classes reduce to the sigmoid?",

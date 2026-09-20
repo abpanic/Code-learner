@@ -41,6 +41,7 @@ Topic                       short overview page — a map, not a lesson
 └── Sub-topic               one idea, one page, one sitting
     ├── explanation         3-5 short sections
     ├── worked example      concrete numbers, not notation alone
+    ├── in code             runnable snippet + what bites you  ← required
     ├── check understanding 2-3 questions with answers
     ├── practice            the problems that exercise this idea
     └── go deeper           theory / explanation / learn-more links
@@ -91,7 +92,12 @@ offending lesson.
 | Body words | 400–700 | **900** |
 | Sections | 3–5 | **6** |
 | Questions | 2–3 | 4 |
+| Code lines | 15–30 | **40** |
 | Reading estimate | 4–6 min | 8 min |
+
+Code and maths do not count toward the word limit — that limit exists to constrain
+*explanation*, and charging for a snippet would push authors to write less prose around it.
+They do count toward the reading estimate, because they are reading load.
 
 **Budget per topic map**: 150–400 words, hard limit 500. It is a map, not a summary.
 
@@ -126,10 +132,18 @@ export type Subtopic = {
   summary: string;       // one line for the topic map — no "and"
   minutes: number;       // 3-8, checked against the word count
   sections: LessonSection[];                           // 3-6
+  code: LessonCode;                                    // required
   questions: { question: string; answer: string }[];   // 2-4
   links: { theory: string; explanation: string; learnMore: string };  // <placeholder>
   problemSlugs?: string[];   // practice for this idea specifically
   notebookId?: string;       // when a notebook belongs to this sub-topic
+};
+
+export type LessonCode = {
+  caption: string;       // one line: what the snippet does
+  body: string;          // runnable as written, under 40 lines
+  caveats: string[];     // what breaks on real data — at least one
+  variation?: { caption: string; body: string };
 };
 
 export type TopicLesson = {
@@ -148,6 +162,8 @@ export type TopicLesson = {
 - `problemSlugs` resolve to real problems, and those problems list this topic
 - `minutes` within ±2 of `words / 180`
 - no raw URL in a section body — links belong in the link slots
+- `code.body` is non-empty, under the line limit, carries at least one caveat, and
+  **parses as Python** (checked against real CPython in `python-harness.test.ts`)
 
 ---
 
@@ -175,6 +191,11 @@ A page is not done until all six are true:
 1. **One idea.** The title needs no "and".
 2. **A worked example with real numbers.** Not just the formula — the arithmetic, small
    enough to follow by hand.
+2b. **Runnable code, with its caveats.** The snippet does the thing on a concrete dataset,
+   in the library a reader would actually reach for, and prints something worth looking at.
+   Under 40 lines: show the step, not a script. Every snippet carries at least one caveat —
+   what breaks when this meets real data — and often a variation worth knowing. This is
+   required and build-enforced; a lesson without it does not compile.
 3. **2-3 checks** with answers that explain rather than assert.
 4. **At least one linked problem**, or an explicit note that practice is still to come.
 5. **Three link slots**, `<placeholder>` until real URLs are chosen.

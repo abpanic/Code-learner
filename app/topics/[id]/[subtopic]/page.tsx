@@ -53,6 +53,7 @@ export default async function SubtopicPage(
 
   const contents: [string, string][] = [
     ...found.sections.map((section) => [section.id, section.heading] as [string, string]),
+    ["code", "In code"],
     ["practice", "Check understanding"],
     ...(problems.length > 0 ? [["problems", "Practice problems"] as [string, string]] : []),
     ...(found.notebookId ? [["notebook", "Python notebook"] as [string, string]] : []),
@@ -97,6 +98,25 @@ export default async function SubtopicPage(
         )}
       </section>
     ))}
+
+    <section id="code" className="lesson-section lesson-code-section">
+      <h2>In code</h2>
+      <p className="code-caption">{found.code.caption}</p>
+      <pre className="lesson-snippet"><code>{found.code.body.trim()}</code></pre>
+      {found.code.variation && (
+        <div className="code-variation">
+          <h3>Variation</h3>
+          <p className="code-caption">{found.code.variation.caption}</p>
+          <pre className="lesson-snippet"><code>{found.code.variation.body.trim()}</code></pre>
+        </div>
+      )}
+      <div className="code-caveats">
+        <h3>What bites you</h3>
+        <ul>
+          {found.code.caveats.map((caveat) => <li key={caveat}>{caveat}</li>)}
+        </ul>
+      </div>
+    </section>
 
     <section id="practice" className="lesson-section">
       <h2>Check your understanding</h2>

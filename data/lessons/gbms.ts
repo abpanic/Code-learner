@@ -82,6 +82,36 @@ improved for some number of rounds. Every major implementation supports it, and 
 close to mandatory rather than optional.`,
         },
       ],
+      code: {
+        caption: "Track validation loss round by round to see where boosting starts hurting.",
+        body: `import numpy as np
+from sklearn.datasets import make_regression
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+
+X, y = make_regression(n_samples=300, n_features=10, noise=25.0, random_state=0)
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, random_state=0)
+
+model = GradientBoostingRegressor(
+    n_estimators=500, learning_rate=0.1, max_depth=3, random_state=0
+).fit(X_tr, y_tr)
+
+# staged_predict replays the ensemble one tree at a time.
+test_error = [mean_squared_error(y_te, p) for p in model.staged_predict(X_te)]
+train_error = [mean_squared_error(y_tr, p) for p in model.staged_predict(X_tr)]
+
+for n in [10, 50, 100, 250, 500]:
+    print(f"{n:4} trees  train={train_error[n-1]:8.1f}  test={test_error[n-1]:8.1f}")
+
+print(f"\\nbest test error at {int(np.argmin(test_error)) + 1} trees")`,
+        caveats: [
+          "Training error falls forever; test error bottoms out and climbs. Tree count is a capacity parameter here, unlike in a forest.",
+          "Use early stopping (n_iter_no_change) rather than a fixed count. The right number depends on the data and on every other parameter.",
+          "Halving the learning rate roughly doubles the trees needed. Tuning one without the other compares configurations that are not comparable.",
+          "Deep trees in a boosted model are a common and expensive mistake. Boosting wants weak learners — depth 3 to 6 — because nothing averages their variance away.",
+        ],
+      },
       questions: [
         {
           question: "Why does a forest tolerate unlimited trees while boosting does not?",
@@ -155,6 +185,38 @@ loss by more than it adds in penalty to be accepted, which is a cleaner mechanis
 post-hoc depth cap and is why these models can afford to search deeper.`,
         },
       ],
+      code: {
+        caption: "Build the ensemble by hand from stumps, then check it against the library.",
+        body: `import numpy as np
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import GradientBoostingRegressor
+
+X = np.array([[1], [2], [3], [4], [5], [6], [7], [8]])
+y = np.array([2.0, 4.0, 6.0, 8.0, 9.0, 11.0, 13.0, 15.0])
+
+lr = 0.5
+prediction = np.full_like(y, y.mean())   # round 0: the mean
+trees = []
+
+for step in range(4):
+    residual = y - prediction            # squared loss -> the gradient is the residual
+    stump = DecisionTreeRegressor(max_depth=1).fit(X, residual)
+    prediction += lr * stump.predict(X)
+    trees.append(stump)
+    print(f"round {step}: rmse={np.sqrt(((y - prediction) ** 2).mean()):.4f}")
+
+reference = GradientBoostingRegressor(
+    n_estimators=4, learning_rate=lr, max_depth=1, random_state=0
+).fit(X, y)
+print("manual   :", np.round(prediction, 3))
+print("sklearn  :", np.round(reference.predict(X), 3))`,
+        caveats: [
+          "Fitting the residual is the squared-loss special case. In general each tree fits the negative gradient of the loss — for log loss that is y minus p, not y minus prediction.",
+          "The corrections shrink each round. Once they are smaller than the noise, further rounds are fitting noise.",
+          "XGBoost adds the second derivative, which gives a closed-form optimal leaf value and a curvature-aware split criterion. It converges in fewer rounds for the same quality.",
+          "The initial prediction matters for non-squared losses: it should be the value minimising the loss, which is the log-odds of the base rate for classification, not zero.",
+        ],
+      },
       questions: [
         {
           question: "When are the pseudo-residuals just ordinary residuals?",
@@ -224,6 +286,37 @@ default with the widest deployment support.
 Pick one, learn its parameters properly, and spend the time you saved on the data.`,
         },
       ],
+      code: {
+        caption: "Histogram-based boosting from scikit-learn, with native categorical handling.",
+        body: `import numpy as np
+from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.model_selection import cross_val_score
+
+rng = np.random.default_rng(0)
+n = 2000
+city = rng.integers(0, 40, size=n)              # high-cardinality categorical
+numeric = rng.normal(size=n)
+y = ((city % 4 == 0) & (numeric > -0.5)).astype(int)
+
+X = np.column_stack([numeric, city]).astype(np.float64)
+X[rng.random(n) < 0.05, 0] = np.nan             # missing values, left as-is
+
+model = HistGradientBoostingClassifier(
+    categorical_features=[1],   # index 1 is categorical, not ordered
+    max_iter=200,
+    early_stopping=True,
+    random_state=0,
+)
+print(f"cv accuracy: {cross_val_score(model, X, y, cv=5).mean():.3f}")
+model.fit(X, y)
+print(f"stopped after {model.n_iter_} iterations of 200")`,
+        caveats: [
+          "Declaring a categorical column matters. Left as a float, city=39 is treated as larger than city=2, and the model wastes splits on an order that does not exist.",
+          "Histogram binning is why this is fast: the split search scans 255 bins rather than every sorted value. The precision lost is negligible.",
+          "LightGBM grows leaf-wise, which reaches lower loss per leaf and overfits small data readily. Constrain num_leaves, not just depth — depth barely bounds leaf-wise growth.",
+          "Target encoding a high-cardinality column leaks unless each row's encoding excludes its own label. That is the problem CatBoost's ordered encoding exists to solve.",
+        ],
+      },
       questions: [
         {
           question: "Why does LightGBM overfit small datasets more readily?",
@@ -292,6 +385,37 @@ leak removed, a target defined more precisely, a validation split that matches h
 actually be used.`,
         },
       ],
+      code: {
+        caption: "Tune in the order that matters, holding the learning rate fixed until last.",
+        body: `import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.model_selection import GridSearchCV, train_test_split
+
+X, y = make_classification(n_samples=2000, n_features=20, n_informative=6,
+                           random_state=0)
+X_fit, X_holdout, y_fit, y_holdout = train_test_split(X, y, random_state=0)
+
+search = GridSearchCV(
+    HistGradientBoostingClassifier(
+        learning_rate=0.05, max_iter=500, early_stopping=True, random_state=0
+    ),
+    {"max_leaf_nodes": [7, 31, 127], "min_samples_leaf": [5, 20, 50]},
+    cv=3,
+    scoring="roc_auc",
+)
+search.fit(X_fit, y_fit)
+
+print("best params:", search.best_params_)
+print(f"cv auc     : {search.best_score_:.4f}   <- selected on, optimistic")
+print(f"holdout auc: {search.score(X_holdout, y_holdout):.4f}   <- the honest one")`,
+        caveats: [
+          "best_score_ was chosen by maximising it, so it is a fitted quantity. Quoting it as your generalisation estimate is the most common way a model looks better in a notebook than in production.",
+          "Early stopping also uses validation data, which makes the round count another selected parameter. It needs the same separation.",
+          "Tune capacity first, then sampling, then penalties, then lower the learning rate. Lowering it first only makes every experiment slower without changing which configuration wins.",
+          "Time-ordered or grouped rows need matching folds. A random split lets a boosted model exploit the future efficiently enough that the score looks excellent.",
+        ],
+      },
       questions: [
         {
           question: "Why tune the learning rate last?",

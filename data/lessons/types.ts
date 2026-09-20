@@ -13,7 +13,7 @@ export const PLACEHOLDER = "<placeholder>" as const;
 export const READING_SPEED_WPM = 180;
 
 export const LIMITS = {
-  subtopic: { words: 900, sections: 6, questions: 4, minutes: 8 },
+  subtopic: { words: 900, sections: 6, questions: 4, minutes: 8, codeLines: 40 },
   subtopicMin: { words: 250, sections: 3, questions: 2, minutes: 3 },
   overview: { words: 500 },
   overviewMin: { words: 150 },
@@ -27,6 +27,25 @@ export type LessonSection = {
   /** Markdown. Inline maths with `$…$`, display with `$$…$$`. */
   body: string;
   callout?: { title: string; body: string };
+};
+
+/**
+ * The runnable part of a lesson.
+ *
+ * Required, not optional. A lesson that explains a method without showing the
+ * code that runs it is half a lesson on a site whose whole premise is code
+ * first — and the caveats are the part readers actually get bitten by, so they
+ * sit with the snippet rather than buried in prose.
+ */
+export type LessonCode = {
+  /** One line saying what the snippet does. */
+  caption: string;
+  /** Runnable as written, against the data it defines. */
+  body: string;
+  /** What breaks when this meets real data. */
+  caveats: string[];
+  /** A variation worth knowing: more features, a different penalty. */
+  variation?: { caption: string; body: string };
 };
 
 export type LessonLinks = {
@@ -44,6 +63,8 @@ export type Subtopic = {
   /** Reading estimate; checked against the measured word count. */
   minutes: number;
   sections: LessonSection[];
+  /** Every lesson ships runnable code. */
+  code: LessonCode;
   questions: { question: string; answer: string }[];
   links: LessonLinks;
   /** Problems that exercise this idea specifically. */
@@ -100,8 +121,16 @@ export function subtopicWords(subtopic: Subtopic): number {
 export const EQUATION_WORDS = 40;
 export const CODE_LINE_WORDS = 8;
 
+export function codeLines(code: LessonCode): number {
+  return code.body.trim().split("\n").length
+    + (code.variation ? code.variation.body.trim().split("\n").length : 0);
+}
+
 export function readingLoad(subtopic: Subtopic): number {
-  let load = subtopicWords(subtopic);
+  let load = subtopicWords(subtopic)
+    + codeLines(subtopic.code) * CODE_LINE_WORDS
+    + countWords(subtopic.code.caption)
+    + subtopic.code.caveats.reduce((n, c) => n + countWords(c), 0);
   for (const section of subtopic.sections) {
     load += (section.body.match(/\$\$[\s\S]*?\$\$/g) ?? []).length * EQUATION_WORDS;
     for (const fence of section.body.match(/```[\s\S]*?```/g) ?? []) {

@@ -88,6 +88,40 @@ can see one token ahead will show excellent validation loss and generate nonsens
 crutch it learned to use is gone at inference.`,
         },
       ],
+      code: {
+        caption: "Scaled dot-product attention in numpy, with and without the scale.",
+        body: `import numpy as np
+
+def softmax(x, axis=-1):
+    shifted = x - x.max(axis=axis, keepdims=True)   # stability, not decoration
+    e = np.exp(shifted)
+    return e / e.sum(axis=axis, keepdims=True)
+
+def attention(Q, K, V, mask=None):
+    scores = Q @ K.T / np.sqrt(Q.shape[-1])
+    if mask is not None:
+        scores = np.where(mask, scores, -np.inf)
+    weights = softmax(scores)
+    return weights @ V, weights
+
+rng = np.random.default_rng(0)
+n, d_k = 4, 64
+Q, K, V = rng.normal(size=(n, d_k)), rng.normal(size=(n, d_k)), rng.normal(size=(n, d_k))
+
+_, weights = attention(Q, K, V)
+print("scaled   max weight:", weights.max().round(3))
+print("unscaled max weight:", softmax(Q @ K.T).max().round(3))
+
+causal = np.tril(np.ones((n, n), dtype=bool))       # no peeking ahead
+_, masked = attention(Q, K, V, mask=causal)
+print("row 1 attends to:", masked[1].round(3))`,
+        caveats: [
+          "Unscaled, the largest weight is close to 1 and the softmax is saturated. A saturated softmax has near-zero gradient, so the model cannot learn where to attend.",
+          "The scale is about gradients, not the forward pass. Without it attention still computes something; it just cannot be trained.",
+          "Subtracting the max before exponentiating prevents overflow. It changes nothing mathematically and everything numerically.",
+          "A causal mask off by one lets each token see one token of the future. Validation loss looks excellent and generation is poor — check masking before anything else.",
+        ],
+      },
       questions: [
         {
           question: "Why divide attention scores by the square root of the key dimension?",
@@ -157,6 +191,40 @@ is the common choice in current large models.`,
           },
         },
       ],
+      code: {
+        caption: "Split into heads, then rotate queries and keys so the score carries distance.",
+        body: `import numpy as np
+
+d_model, n_heads, seq = 64, 8, 5
+d_head = d_model // n_heads          # heads divide the width, they do not add to it
+
+rng = np.random.default_rng(0)
+x = rng.normal(size=(seq, d_model))
+heads = x.reshape(seq, n_heads, d_head).transpose(1, 0, 2)
+print("x", x.shape, "-> heads", heads.shape, "(head, position, dim)")
+
+def rope(v, positions, base=10000.0):
+    d = v.shape[-1]
+    freqs = base ** (-np.arange(0, d, 2) / d)
+    angles = positions[:, None] * freqs[None, :]
+    cos, sin = np.cos(angles), np.sin(angles)
+    even, odd = v[..., 0::2], v[..., 1::2]
+    return np.stack([even * cos - odd * sin, even * sin + odd * cos], -1).reshape(v.shape)
+
+positions = np.arange(seq)
+q = rope(rng.normal(size=(seq, d_head)), positions)
+k = rope(rng.normal(size=(seq, d_head)), positions)
+
+scores = q @ k.T
+print("score(0,1)", round(float(scores[0, 1]), 4),
+      " score(2,3)", round(float(scores[2, 3]), 4), "<- same distance")`,
+        caveats: [
+          "Attention is permutation-equivariant: shuffle the tokens and the outputs shuffle with them, unchanged. Position has to be injected deliberately.",
+          "Heads split the width rather than duplicating it, so eight 64-dimensional heads cost about the same as one 512-dimensional one while holding several relational patterns.",
+          "Learned absolute encodings cannot extrapolate: position 5000 has no vector if training stopped at 2048. Rotary encodings are defined at any position.",
+          "RoPE makes the score depend on the difference of rotation angles, so it carries relative distance without the model ever seeing an absolute index.",
+        ],
+      },
       questions: [
         {
           question: "Why use eight 64-dimensional heads rather than one 512-dimensional one?",
@@ -226,6 +294,45 @@ with it. Modern variants often use gated activations such as SwiGLU and adjust t
 the parameter count comparable.`,
         },
       ],
+      code: {
+        caption: "A pre-norm block in numpy, and why the residual path must stay clear.",
+        body: `import numpy as np
+
+def layer_norm(x, eps=1e-5):
+    mean = x.mean(-1, keepdims=True)
+    var = x.var(-1, keepdims=True)
+    return (x - mean) / np.sqrt(var + eps)
+
+def block(x, attend, ffn, pre_norm=True):
+    if pre_norm:
+        x = x + attend(layer_norm(x))     # residual path stays untouched
+        x = x + ffn(layer_norm(x))
+    else:
+        x = layer_norm(x + attend(x))     # normalisation sits on the residual
+        x = layer_norm(x + ffn(x))
+    return x
+
+rng = np.random.default_rng(0)
+d = 32
+W1, W2 = rng.normal(size=(d, 4 * d)) * 0.1, rng.normal(size=(4 * d, d)) * 0.1
+ffn = lambda h: np.maximum(0, h @ W1) @ W2
+attend = lambda h: h * 0.5               # stand-in for real attention
+
+x = rng.normal(size=(6, d))
+for depth in [1, 12, 48]:
+    for mode in (True, False):
+        h = x.copy()
+        for _ in range(depth):
+            h = block(h, attend, ffn, pre_norm=mode)
+        name = "pre" if mode else "post"
+        print(f"depth {depth:3} {name:4}-norm  activation std = {h.std():.3f}")`,
+        caveats: [
+          "Only attention moves information between positions. The feedforward sub-layer sees one position at a time, so every cross-token interaction in the model happens in attention.",
+          "The residual addition is what makes depth trainable: it gives the gradient an identity path back through every block.",
+          "Post-norm puts a normalisation directly on that path, which destabilises deep stacks and needs careful warmup. Essentially all modern large models use pre-norm.",
+          "Most parameters live in the feedforward expansion, not in attention. When people say a transformer stores knowledge, this is largely where they mean.",
+        ],
+      },
       questions: [
         {
           question: "Which part of a block lets tokens exchange information?",
@@ -292,6 +399,36 @@ mean it uses them well. Retrieval accuracy tends to sag in the middle of a long 
 context length is a capability ceiling rather than a guarantee.`,
         },
       ],
+      code: {
+        caption: "Measure where the quadratic term overtakes everything else.",
+        body: `import numpy as np
+
+d_model, n_layers, n_heads = 4096, 32, 32
+BYTES = 2                      # fp16
+
+def attention_scores_bytes(n):
+    return n * n * n_heads * BYTES          # one layer, if materialised
+
+def ffn_flops(n):
+    return 2 * n * d_model * (4 * d_model)  # linear in n
+
+def kv_cache_bytes(n, batch=1):
+    return 2 * n * d_model * n_layers * batch * BYTES
+
+print(f"{'tokens':>8} {'scores/layer':>14} {'ffn flops':>14} {'kv cache':>12}")
+for n in [512, 2048, 8192, 32768, 131072]:
+    print(f"{n:8} {attention_scores_bytes(n) / 1e9:11.2f} GB "
+          f"{ffn_flops(n) / 1e12:11.2f} TF "
+          f"{kv_cache_bytes(n) / 1e9:9.2f} GB")
+
+print("\\ndoubling tokens: ffn cost x2, attention scores x4")`,
+        caveats: [
+          "Attention is quadratic and the feedforward layers are linear, so the crossover arrives in the low thousands of tokens. Below that, attention is not your bottleneck.",
+          "FlashAttention never materialises that score matrix — it tiles the computation. It is exact, saving memory traffic rather than arithmetic, so the quadratic term remains.",
+          "At long contexts the KV cache can exceed the model weights. Multi-query and grouped-query attention share key and value projections specifically to shrink it.",
+          "Accepting 128k tokens is not using them. Retrieval accuracy commonly sags in the middle of a long context, so the number is a ceiling rather than a promise.",
+        ],
+      },
       questions: [
         {
           question: "What exactly does FlashAttention save?",

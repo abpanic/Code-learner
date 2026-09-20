@@ -25,6 +25,11 @@ function subtopic(over: Partial<Subtopic> = {}): Subtopic {
       { id: "two", heading: "Two", body: words(120) },
       { id: "three", heading: "Three", body: words(120) },
     ],
+    code: {
+      caption: "A snippet.",
+      body: "print(1)",
+      caveats: ["It only prints 1."],
+    },
     questions: [
       { question: "Q1?", answer: "A1." },
       { question: "Q2?", answer: "A2." },

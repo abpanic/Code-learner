@@ -32,3 +32,13 @@
 
 .mark-read { display: flex; align-items: center; gap: 10px; min-height: 36px; margin-top: 20px; }
 .mark-read-done { display: inline-flex; align-items: center; gap: 6px; color: var(--ok-ink); font-size: 13px; font-weight: 700; }
+
+.code-caption { margin: 0 0 10px; color: var(--ink-3); font-size: 14px; line-height: 1.6; }
+.lesson-snippet { margin: 0; padding: 16px 18px; overflow-x: auto; border-radius: 11px; background: var(--code-bg); color: var(--code-ink); font: 13px/1.65 var(--font-mono); }
+.code-variation { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+.code-variation h3 { margin: 0 0 6px; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.code-caveats { margin-top: 18px; padding: 15px 17px; border: 1px solid var(--warn-line); border-radius: 11px; background: var(--warn-surface); }
+.code-caveats h3 { margin: 0 0 8px; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--warn-ink); }
+.code-caveats ul { margin: 0; padding-left: 20px; color: var(--ink-2); }
+.code-caveats li { margin: 6px 0; font-size: 13.5px; line-height: 1.6; }
+.code-caveats li::marker { color: var(--warn-ink); }
