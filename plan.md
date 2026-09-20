@@ -6,7 +6,7 @@ tests. Theory, explanation and "learn more" are **links only**, and every one of
 as the literal token `<placeholder>` until real URLs are chosen.
 
 Audience: whoever picks up this repo next (you, or a collaborator).
-Status: **Phases 0, 1 and 2 complete.** Phase 3 (dashboard + IA) is next.
+Status: **Phases 0-3 complete.** Phase 4 (accounts, optional) and Phase 5 (polish) remain.
 
 ---
 
@@ -87,12 +87,12 @@ Routes marked **new** do not exist yet. `(…)` denotes a route group, `[…]` a
 
 | Route | Type | Purpose | Key components | Data source | Phase |
 |---|---|---|---|---|---|
-| `/` | **replace** | Learner dashboard — the home screen | `StreakCard`, `SolvedByDifficulty`, `TopicHeatmap`, `ReviewQueue`, `ContinueWhereYouLeftOff` | attempts + progress store | 3 |
+| `/` | done | Learner dashboard — the home screen | `StreakCard`, `SolvedByDifficulty`, `TopicHeatmap`, `ReviewQueue`, `ContinueWhereYouLeftOff` | attempts + progress store | 3 |
 | `/problems` | done | Sortable, filterable problem list (the LeetCode table) | `ProblemTable`, `ProblemFilters`, `StatusPill` | `data/problems/*` | 1 |
 | `/problems/[slug]` | done | The workspace — *this is the product* | `ProblemPane`, `CodeEditor`, `RunBar`, `TestResults`, `PlaceholderLinks` | `data/problems/<slug>` | 1–2 |
-| `/topics` | **new** | Curriculum view — the 70 topics, each with its problem count | `TopicGrid`, `DomainSection`, `EvidenceSelect` | `data/topics.json` | 3 |
-| `/topics/[id]` | **keep + extend** | Existing six ML lessons; all 70 get a problems list + `<placeholder>` theory links | `LessonShell`, `ProblemsForTopic`, `PlaceholderLinks` | `core-lessons.ts`, problems | 3 |
-| `/matrix` | **move** | Today's tracker UI, relocated off `/` | existing `Tracker` | progress store | 3 |
+| `/topics` | done | Curriculum view — the 70 topics, each with its problem count | `TopicGrid`, `DomainSection`, `EvidenceSelect` | `data/topics.json` | 3 |
+| `/topics/[id]` | done | Existing six ML lessons; all 70 get a problems list + `<placeholder>` theory links | `LessonShell`, `ProblemsForTopic`, `PlaceholderLinks` | `core-lessons.ts`, problems | 3 |
+| `/matrix` | done | Today's tracker UI, relocated off `/` | existing `Tracker` | progress store | 3 |
 | `/review` | **new** | Spaced-repetition queue: problems due for a re-solve | `ReviewQueue`, `DueCard` | attempts store | 5 |
 | `/settings` | **new** | Import/export progress, reset, editor prefs, theme | `ProgressIO`, `ThemeToggle` | progress store | 5 |
 | `/api/run` | *not built* | Deliberately absent — execution stays client-side (D2) | — | — | — |
@@ -330,16 +330,22 @@ One change from the plan: `/api/run` stays absent as intended, and the worker de
 does no grading — it reports raw return values and `lib/runner/compare.ts` decides. That is
 what lets the live runner and the build-time solution tests share one rule set.
 
-### Phase 3 — Dashboard and IA (est. 2–3 days) ⟵ **start here**
+### Phase 3 — Dashboard and IA ✅ done
 
 1. Move `Tracker` to `/matrix`; build the dashboard at `/`; add the `/?topic=` redirect.
 2. Cards per Section 8.
 3. `/topics` and `/topics/[id]` extended with per-topic problem lists.
 
-**Done when:** `/` answers "what should I do next?" in one screen, and every number on it
-traces to either `attempts` or `progress`.
+**Verified** by 6 Playwright tests against a seeded store: the continue card names the
+unsolved problem and links to it, each tile matches the seed, the empty state reads
+correctly before any run, `/?topic=<id>` still reaches the matrix, and topic pages work with
+and without problems.
 
-### Phase 4 — Accounts and durable storage (est. 3–4 days, optional)
+Added beyond the plan: `app/site-header.tsx`. The topbar was duplicated across three pages,
+which would have made the `/` → `/matrix` move a scattered edit. `/topics/[id]` also covers
+all 64 lesson-less topics, which the plan folded into the `/topics` line.
+
+### Phase 4 — Accounts and durable storage (est. 3–4 days, optional) ⟵ **next, if wanted**
 
 Only if progress must survive a browser change. Neon Postgres + Drizzle + Auth.js, Route
 Handlers at `/api/attempts` and `/api/progress`, localStorage becomes an offline cache that
