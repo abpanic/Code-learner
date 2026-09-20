@@ -4,7 +4,6 @@ import { ArrowUpRight, NotebookPen } from "lucide-react";
 import topicData from "@/data/topics.json";
 import notebookIds from "@/data/notebooks.json";
 import { problems } from "@/data/problems";
-import { coreLessons } from "@/data/core-lessons";
 import { getTopicLesson } from "@/data/lessons";
 import { SiteHeader } from "@/app/site-header";
 import { TopicStatus } from "./topic-status";
@@ -16,9 +15,6 @@ export const metadata: Metadata = {
 };
 
 const notebooks = new Set<string>(notebookIds);
-
-/** Topics still on the old single-page lesson route; C1 empties this out. */
-const legacyLessonIds = new Set(Object.keys(coreLessons));
 
 export default function TopicsPage() {
   const problemCounts = new Map<string, number>();
@@ -68,14 +64,10 @@ export default function TopicsPage() {
                   <div className="topics-badges">
                     {(() => {
                       const lesson = getTopicLesson(topic.id);
-                      if (lesson) {
-                        return <span className="badge-lesson">
-                          {lesson.subtopics.length} lessons
-                        </span>;
-                      }
-                      return legacyLessonIds.has(topic.id)
-                        ? <span className="badge-lesson">Lesson</span>
-                        : null;
+                      if (!lesson) return null;
+                      return <span className="badge-lesson">
+                        {lesson.subtopics.length} lessons
+                      </span>;
                     })()}
                     {notebooks.has(topic.id) && (
                       <span className="badge-notebook"><NotebookPen size={12} /> Notebook</span>

@@ -4,7 +4,6 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, NotebookPen } from "luci
 import { NavigationReset } from "./navigation-reset";
 import { SiteHeader } from "@/app/site-header";
 import { TopicProgress } from "./topic-progress";
-import { CORE_LESSON_ORDER, CORE_LESSON_TITLES } from "@/data/core-lessons";
 import "./lesson.css";
 import "./core-lesson.css";
 
@@ -47,24 +46,13 @@ export function LessonShell({
   contents: readonly (readonly [string, string])[];
   note: string;
   sources: readonly LessonSource[];
-  /** Supplied by sub-topic pages; Core ML lessons fall back to their own order. */
-  neighbours?: { previous?: LessonNeighbour; next?: LessonNeighbour };
+  neighbours: { previous?: LessonNeighbour; next?: LessonNeighbour };
   /** Trail between "Topics" and the title. */
   breadcrumb?: readonly { href?: string; label: string }[];
   back?: { href: string; label: string };
   children: ReactNode;
 }) {
-  const index = CORE_LESSON_ORDER.indexOf(topicId as (typeof CORE_LESSON_ORDER)[number]);
-  const previous = neighbours
-    ? neighbours.previous
-    : index > 0
-      ? { href: `/topics/${CORE_LESSON_ORDER[index - 1]}`, title: CORE_LESSON_TITLES[CORE_LESSON_ORDER[index - 1]] }
-      : undefined;
-  const next = neighbours
-    ? neighbours.next
-    : index >= 0 && CORE_LESSON_ORDER[index + 1]
-      ? { href: `/topics/${CORE_LESSON_ORDER[index + 1]}`, title: CORE_LESSON_TITLES[CORE_LESSON_ORDER[index + 1]] }
-      : undefined;
+  const { previous, next } = neighbours;
   return <main id="main" className="lesson-shell"><NavigationReset />
     <SiteHeader back={back ?? { href: "/topics", label: "All topics" }} />
     <div className="lesson-container">

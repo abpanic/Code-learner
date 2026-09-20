@@ -125,3 +125,23 @@ test("the topics index counts lessons per topic", async ({ page }) => {
   const card = page.locator(".topics-card", { hasText: "Linear Regression" });
   await expect(card.locator(".badge-lesson")).toContainText("4 lessons");
 });
+
+test("every Core ML topic is a map with lessons, at its original URL", async ({ page }) => {
+  const core = ["lin_reg", "log_reg", "trees_rf", "gbms", "dl_fnn", "transformers"];
+  for (const id of core) {
+    // These URLs predate the split; they must keep working.
+    const response = await page.goto(`/topics/${id}`);
+    expect(response?.status(), id).toBe(200);
+    await expect(page.locator(".subtopic-card"), id).toHaveCount(4);
+    await expect(page.locator(".topic-overview"), id).toBeVisible();
+  }
+});
+
+test("a migrated lesson renders its content", async ({ page }) => {
+  await page.goto("/topics/transformers/attention");
+  await expect(page.locator(".lesson-heading h1")).toContainText("attention");
+  // Maths renders, the notebook loads, and the link slots are reserved.
+  await expect(page.locator(".katex").first()).toBeVisible();
+  await expect(page.locator(".link-slot-empty")).toHaveCount(3);
+  await expect(page.locator(".practice-list > div")).toHaveCount(2);
+});

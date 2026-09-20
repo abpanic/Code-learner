@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, Lock } from "lucide-react";
 import topicData from "@/data/topics.json";
 import notebookIds from "@/data/notebooks.json";
-import { coreLessons } from "@/data/core-lessons";
 import { problemsForTopic } from "@/data/problems";
 import { getTopicLesson } from "@/data/lessons";
 import { SiteHeader } from "@/app/site-header";
@@ -21,17 +20,11 @@ import "./topic-extra.css";
 
 export const dynamic = "force-static";
 
-/**
- * Covers every topic that does not have a hand-written lesson. The six Core ML
- * lessons live in their own folders, and Next prefers those static segments
- * over this dynamic one, so they are simply excluded here.
- */
-// The five Core ML topics still on bespoke routes; C1 moves them into
-// data/lessons and this set empties out.
-const lessonIds = new Set(Object.keys(coreLessons));
+/** Every topic now renders here: a map when it has lessons, the matrix
+ * material when it does not. No topic route is hand-written any more. */
 const notebooks = new Set<string>(notebookIds);
 
-const topics = topicData.skillsData.filter((topic) => !lessonIds.has(topic.id));
+const topics = topicData.skillsData;
 const byId = new Map(topics.map((topic) => [topic.id, topic]));
 
 export function generateStaticParams() {

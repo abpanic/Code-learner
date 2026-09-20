@@ -10,6 +10,11 @@ import {
   type TopicLesson,
 } from "./types";
 import { linRegLesson } from "./lin_reg";
+import { logRegLesson } from "./log_reg";
+import { treesRfLesson } from "./trees_rf";
+import { gbmsLesson } from "./gbms";
+import { dlFnnLesson } from "./dl_fnn";
+import { transformersLesson } from "./transformers";
 
 export * from "./types";
 
@@ -18,7 +23,14 @@ export * from "./types";
  * validation below runs at module load, so a lesson that breaks the size rule
  * fails `pnpm build` rather than shipping.
  */
-const registry: TopicLesson[] = [linRegLesson];
+const registry: TopicLesson[] = [
+  linRegLesson,
+  logRegLesson,
+  treesRfLesson,
+  gbmsLesson,
+  dlFnnLesson,
+  transformersLesson,
+];
 
 const knownTopicIds = new Set(topicData.skillsData.map((topic) => topic.id));
 const knownSlugs = new Set(problems.map((problem) => problem.slug));
