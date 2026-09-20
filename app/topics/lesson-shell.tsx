@@ -46,7 +46,7 @@ export function LessonShell({
   const index = CORE_LESSON_ORDER.indexOf(topicId as (typeof CORE_LESSON_ORDER)[number]);
   const prev = index > 0 ? CORE_LESSON_ORDER[index - 1] : undefined;
   const next = index >= 0 ? CORE_LESSON_ORDER[index + 1] : undefined;
-  return <main className="lesson-shell"><NavigationReset />
+  return <main id="main" className="lesson-shell"><NavigationReset />
     <SiteHeader back={{ href: "/topics", label: "All topics" }} />
     <div className="lesson-container">
       <nav aria-label="Breadcrumb" className="lesson-breadcrumb"><Link href="/topics">Topics</Link><span>/</span><span>Core ML</span><span>/</span><strong>{title}</strong></nav>

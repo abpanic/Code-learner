@@ -1,28 +1,28 @@
 .topics-index { max-width: 1240px; margin: 0 auto; padding: 30px clamp(20px, 4vw, 56px) 70px; }
 .topics-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 8px; }
 .topics-heading h1 { margin: 0 0 7px; font-size: 34px; letter-spacing: -.03em; }
-.topics-heading .heading-copy { margin: 0; max-width: 66ch; color: #536477; font-size: 14px; line-height: 1.6; }
-.topics-matrix-link { flex: none; display: inline-flex; align-items: center; gap: 5px; color: #176f79; font-size: 13px; font-weight: 700; }
+.topics-heading .heading-copy { margin: 0; max-width: 66ch; color:var(--ink-3); font-size: 14px; line-height: 1.6; }
+.topics-matrix-link { flex: none; display: inline-flex; align-items: center; gap: 5px; color:var(--brand); font-size: 13px; font-weight: 700; }
 .topics-matrix-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 .topics-domain { margin-top: 26px; }
-.topics-domain-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; padding-bottom: 9px; border-bottom: 1px solid #dfe6ec; }
-.topics-domain-head h2 { margin: 2px 0 0; font-size: 19px; letter-spacing: -.02em; color: #1d3644; }
-.topics-domain-head .section-layer { color: #187981; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
-.topics-domain-count { color: #7b8c9b; font-size: 12px; white-space: nowrap; }
+.topics-domain-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; padding-bottom: 9px; border-bottom:1px solid var(--line); }
+.topics-domain-head h2 { margin: 2px 0 0; font-size: 19px; letter-spacing: -.02em; color:var(--ink); }
+.topics-domain-head .section-layer { color:var(--brand); font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.topics-domain-count { color:var(--ink-4); font-size: 12px; white-space: nowrap; }
 
 .topics-grid { list-style: none; margin: 13px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.topics-card { display: flex; flex-direction: column; min-width: 0; padding: 15px 16px; border: 1px solid #e0e7ec; border-radius: 11px; background: #fff; }
-.topics-card-title { color: #17394a; font-size: 15px; font-weight: 720; line-height: 1.32; letter-spacing: -.015em; }
-.topics-card-title:hover { color: #176f79; text-decoration: underline; text-underline-offset: 3px; }
-.topics-card p { margin: 7px 0 13px; color: #536477; font-size: 12.5px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.topics-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin-top: auto; padding-top: 11px; border-top: 1px solid #eef2f5; }
+.topics-card { display: flex; flex-direction: column; min-width: 0; padding: 15px 16px; border:1px solid var(--line); border-radius: 11px; background:var(--surface); }
+.topics-card-title { color:var(--ink); font-size: 15px; font-weight: 720; line-height: 1.32; letter-spacing: -.015em; }
+.topics-card-title:hover { color:var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+.topics-card p { margin: 7px 0 13px; color:var(--ink-3); font-size: 12.5px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.topics-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin-top: auto; padding-top: 11px; border-top:1px solid var(--line); }
 .topics-badges { display: flex; flex-wrap: wrap; gap: 5px; min-width: 0; }
 .badge-lesson, .badge-notebook, .badge-problems { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 750; line-height: 1.4; padding: 3px 7px; border-radius: 5px; white-space: nowrap; }
-.badge-lesson { background: #e7f4f5; color: #226d79; }
-.badge-notebook { background: #eef2f8; color: #46618a; }
-.badge-problems { background: #edf6ef; color: #2c6b45; }
-.badge-problems:hover { background: #dcefe1; text-decoration: underline; }
+.badge-lesson { background:var(--brand-surface); color:var(--brand); }
+.badge-notebook { background:var(--info-surface); color:var(--ink-3); }
+.badge-problems { background:var(--ok-surface); color:var(--ok-ink); }
+.badge-problems:hover { background:var(--ok-surface); text-decoration: underline; }
 
 @media (max-width: 1000px) { .topics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) {

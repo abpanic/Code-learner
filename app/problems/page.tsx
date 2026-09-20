@@ -22,7 +22,7 @@ function topicOptions(): TopicOption[] {
 }
 
 export default function ProblemsPage() {
-  return <main className="problems-shell">
+  return <main id="main" className="problems-shell">
     <SiteHeader />
     <ProblemBrowser problems={[...problems]} topics={topicOptions()} />
   </main>;

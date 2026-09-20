@@ -45,12 +45,14 @@ export function CodeEditor({
   language,
   onChange,
   onRun,
+  onSubmit,
   label,
 }: {
   value: string;
   language: Language;
   onChange: (next: string) => void;
   onRun: () => void;
+  onSubmit: () => void;
   label: string;
 }) {
   const host = useRef<HTMLDivElement>(null);
@@ -60,9 +62,9 @@ export function CodeEditor({
   const applyingExternal = useRef(false);
   // The keymap and update listener outlive any single render, so they read
   // callbacks through a ref that is refreshed after each commit.
-  const latest = useRef({ onChange, onRun });
+  const latest = useRef({ onChange, onRun, onSubmit });
   useEffect(() => {
-    latest.current = { onChange, onRun };
+    latest.current = { onChange, onRun, onSubmit };
   });
 
   useEffect(() => {
@@ -83,6 +85,14 @@ export function CodeEditor({
             preventDefault: true,
             run: () => {
               latest.current.onRun();
+              return true;
+            },
+          },
+          {
+            key: "Mod-Shift-Enter",
+            preventDefault: true,
+            run: () => {
+              latest.current.onSubmit();
               return true;
             },
           },

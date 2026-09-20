@@ -121,11 +121,12 @@ export function Workspace({ problem }: { problem: Problem }) {
       language={language}
       onChange={editCode}
       onRun={() => execute(false)}
+      onSubmit={() => execute(true)}
       label={`${LANGUAGE_LABELS[language]} solution for ${problem.title}`}
     />
     <p className="workspace-hint">
-      <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Enter</kbd> runs the visible tests. Submit also runs
-      the hidden ones.
+      <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Enter</kbd> runs the visible tests;
+      add <kbd>Shift</kbd> to submit with the hidden ones. Press <kbd>?</kbd> for all shortcuts.
     </p>
 
     <Results state={state} solved={solved} />

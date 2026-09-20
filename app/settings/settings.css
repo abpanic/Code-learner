@@ -1,0 +1,33 @@
+.settings-page { max-width: 760px; margin: 0 auto; padding: 26px clamp(20px, 4vw, 56px) 70px; }
+.settings-heading h1 { margin: 2px 0 0; font-size: 32px; letter-spacing: -.03em; }
+.settings { display: flex; flex-direction: column; gap: 14px; margin-top: 22px; }
+
+.settings-block { padding: 20px 22px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); }
+.settings-block h2 { margin: 0 0 5px; font-size: 17px; letter-spacing: -.02em; color: var(--ink); }
+.settings-block > p { margin: 0 0 15px; color: var(--ink-3); font-size: 13.5px; line-height: 1.6; max-width: 66ch; }
+
+.theme-choice { display: flex; flex-wrap: wrap; gap: 8px; }
+.theme-option { display: inline-flex; align-items: center; gap: 8px; padding: 9px 15px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--ink-3); font-size: 13.5px; font-weight: 650; cursor: pointer; }
+.theme-option:hover { border-color: var(--brand-line); color: var(--ink-2); }
+.theme-option svg { color: var(--ink-4); }
+.theme-option-active { border-color: var(--brand); background: var(--brand-surface); color: var(--brand); }
+.theme-option-active svg { color: var(--brand); }
+.theme-option:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.settings-stats { display: flex; flex-wrap: wrap; gap: 10px 32px; margin: 0 0 15px; }
+.settings-stats dt { color: var(--ink-4); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.settings-stats dd { margin: 3px 0 0; color: var(--ink); font-size: 24px; letter-spacing: -.03em; }
+
+.settings-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+.settings-notice { margin: 0 0 12px; padding: 10px 13px; border: 1px solid var(--ok-line); border-radius: 9px; background: var(--ok-surface); color: var(--ok-ink); font-size: 13px; }
+.settings-error { margin: 0 0 12px; padding: 10px 13px; border: 1px solid var(--danger-line); border-radius: 9px; background: var(--danger-surface); color: var(--danger-ink); font-size: 13px; }
+
+.settings-danger { border-color: var(--danger-line); }
+.settings-danger h2 { color: var(--danger-ink); }
+.settings-reset { border-color: var(--danger-line); color: var(--danger-ink); }
+.settings-reset:hover { background: var(--danger-surface); color: var(--danger-ink); }
+
+@media (max-width: 520px) {
+  .settings-heading h1 { font-size: 27px; }
+  .settings-actions > * { flex: 1 1 100%; }
+}

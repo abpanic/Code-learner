@@ -144,7 +144,7 @@ export default function Tracker() {
   };
   const clearFilters = () => { setSearch(""); setDomain("all"); setStatusFilter("all"); setNotebooksOnly(false); };
 
-  return <main className="site-shell">
+  return <main id="main" className="site-shell">
     <header className="topbar">
       <div className="topbar-inner">
         <div className="brand"><span className="brand-mark">AI<span className="brand-dot">·</span>ML</span><div><strong>Competency Matrix</strong><span>Science · Systems · Leadership</span></div></div>

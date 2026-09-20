@@ -1,10 +1,10 @@
-.lesson-topbar { background: #111f33; border-bottom: 1px solid #2b4357; }
+.lesson-topbar { background:var(--topbar-bg); border-bottom:1px solid var(--topbar-line); }
 .lesson-topbar-inner { max-width: 1480px; margin: auto; min-height: 72px; padding: 12px clamp(20px,4vw,64px); display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap; }
-.lesson-brand { display: flex; align-items: center; gap: 13px; color: #f4fbfe; font-weight: 760; font-size: 16px; }
+.lesson-brand { display: flex; align-items: center; gap: 13px; color:var(--topbar-ink); font-weight: 760; font-size: 16px; }
 .site-nav { display: flex; align-items: center; gap: 18px; }
-.site-nav > a { color: #c8d8e5; font-size: 14px; font-weight: 630; }
-.site-nav > a:hover { color: #fff; }
-.lesson-back { display: inline-flex; align-items: center; gap: 7px; padding-left: 18px; border-left: 1px solid #33506a; }
+.site-nav > a { color:var(--topbar-ink-2); font-size: 14px; font-weight: 630; }
+.site-nav > a:hover { color:var(--topbar-ink); }
+.lesson-back { display: inline-flex; align-items: center; gap: 7px; padding-left: 18px; border-left:1px solid var(--topbar-line); }
 @media (max-width: 520px) {
   .lesson-brand > span:last-child { font-size: 13px; }
   .site-nav { gap: 13px; }

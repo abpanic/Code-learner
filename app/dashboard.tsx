@@ -66,7 +66,7 @@ export function Dashboard({
   const withEvidence = Object.keys(topicTitles).filter((id) => evidenceScore(level(id)) > 0).length;
   const totalTopics = Object.keys(topicTitles).length;
 
-  return <main className="dashboard">
+  return <main id="main" className="dashboard">
     <section className="dash-hero">
       <div>
         <p className="eyebrow">YOUR LEARNING WORKSPACE</p>

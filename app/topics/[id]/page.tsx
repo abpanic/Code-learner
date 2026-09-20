@@ -49,7 +49,7 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
 
   return <>
     <SiteHeader back={{ href: "/topics", label: "All topics" }} />
-    <main className="topic-page">
+    <main id="main" className="topic-page">
       <nav aria-label="Breadcrumb" className="lesson-breadcrumb">
         <Link href="/topics">Topics</Link><span>/</span>
         <span>{topic.domainName}</span><span>/</span>

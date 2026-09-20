@@ -29,7 +29,7 @@ export default function TopicsPage() {
 
   return <>
     <SiteHeader />
-    <main className="topics-index">
+    <main id="main" className="topics-index">
       <section className="topics-heading">
         <div>
           <p className="eyebrow">CURRICULUM</p>

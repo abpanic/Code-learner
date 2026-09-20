@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { ThemeToggle } from "./theme-toggle";
 import "./site-header.css";
 
 /**
@@ -17,6 +18,9 @@ export function SiteHeader({ back }: { back?: { href: string; label: string } })
         <Link href="/problems">Problems</Link>
         <Link href="/topics">Topics</Link>
         <Link href="/matrix">Matrix</Link>
+        <Link href="/review">Review</Link>
+        <Link href="/settings">Settings</Link>
+        <ThemeToggle />
         {back && (
           <Link href={back.href} className="lesson-back">
             <ArrowLeft size={16} /> {back.label}

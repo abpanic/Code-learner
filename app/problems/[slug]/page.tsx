@@ -68,7 +68,7 @@ export default async function ProblemPage({ params }: { params: Promise<{ slug: 
   const hiddenCount = problem.tests.length - shown.length;
   const primaryTopic = problem.topicIds[0];
 
-  return <main className="problems-shell">
+  return <main id="main" className="problems-shell">
     <SiteHeader back={{ href: "/problems", label: "All problems" }} />
 
     <div className="problem-detail">

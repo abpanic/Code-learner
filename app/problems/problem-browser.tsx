@@ -116,6 +116,7 @@ export function ProblemBrowser({
         <Search size={17} aria-hidden="true" />
         <Input
           aria-label="Search problems"
+          data-shortcut="search"
           placeholder="Search titles, tags, or topics"
           value={filters.q}
           onChange={(event) => setFilter("q", event.target.value)}

@@ -1,0 +1,31 @@
+.review-page { max-width: 860px; margin: 0 auto; padding: 26px clamp(20px, 4vw, 56px) 70px; }
+.review-heading h1 { margin: 2px 0 8px; font-size: 32px; letter-spacing: -.03em; }
+.review-heading .heading-copy { margin: 0; max-width: 64ch; color: var(--ink-3); font-size: 14px; line-height: 1.6; }
+.review-list { margin-top: 22px; }
+.review-count { margin: 0 0 12px; color: var(--ink-2); font-size: 14px; font-weight: 650; }
+
+.review-due { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+.review-due li { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 17px; border-top: 1px solid var(--line-soft); }
+.review-due li:first-child { border-top: none; }
+.review-title { color: var(--ink); font-size: 15px; font-weight: 700; }
+.review-title:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+.review-due p { margin: 4px 0 0; color: var(--ink-4); font-size: 12.5px; }
+
+.review-empty { text-align: center; padding: 52px 22px; border: 1px dashed var(--line); border-radius: 13px; background: var(--surface); }
+.review-empty svg { color: var(--ok-ink); margin: 0 auto 10px; display: block; }
+.review-empty h2 { margin: 0 0 6px; font-size: 19px; letter-spacing: -.02em; color: var(--ink); }
+.review-empty p { margin: 0 auto 16px; max-width: 52ch; color: var(--ink-3); font-size: 13.5px; line-height: 1.6; }
+
+.review-upcoming { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); }
+.review-upcoming h2 { display: flex; align-items: center; gap: 7px; margin: 0 0 10px; color: var(--ink-3); font-size: 11px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+.review-upcoming ul { list-style: none; margin: 0; padding: 0; }
+.review-upcoming li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--line-soft); }
+.review-upcoming li:first-child { border-top: none; }
+.review-upcoming a { color: var(--ink-2); font-size: 13.5px; }
+.review-upcoming a:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+.review-upcoming span { color: var(--ink-4); font-size: 12px; white-space: nowrap; }
+
+@media (max-width: 560px) {
+  .review-heading h1 { font-size: 27px; }
+  .review-due li { flex-direction: column; align-items: flex-start; }
+}
