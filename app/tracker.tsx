@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen, Download, FileCode2, FilterX, NotebookPen, Search, Upload, ArrowUpRight } from "lucide-react";
+import { BookOpen, Code2, Download, FileCode2, FilterX, NotebookPen, Search, Upload, ArrowUpRight } from "lucide-react";
 import topicData from "@/data/topics.json";
 import { LEVEL_LABELS, LEVEL_OPTIONS, type Level, clearProgress, evidenceScore, isLevel, normalizeLevel, readProgress, useHydrated, useProgress, writeProgress } from "@/lib/progress";
 import notebookIds from "@/data/notebooks.json";
@@ -148,7 +148,7 @@ export default function Tracker() {
     <header className="topbar">
       <div className="topbar-inner">
         <div className="brand"><span className="brand-mark">AI<span className="brand-dot">·</span>ML</span><div><strong>Competency Matrix</strong><span>Science · Systems · Leadership</span></div></div>
-        <div className="role-control"><span className="topbar-label">Target role</span>{selectControl(role, setRole, roles, "Target role", "role-select")}</div>
+        <div className="topbar-actions"><Link href="/problems" className="topbar-link"><Code2 size={15} /> Problems</Link><div className="role-control"><span className="topbar-label">Target role</span>{selectControl(role, setRole, roles, "Target role", "role-select")}</div></div>
       </div>
     </header>
 

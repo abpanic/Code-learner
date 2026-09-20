@@ -50,6 +50,9 @@ button, input { font: inherit; }
 .brand-dot { color: #56cfbb; }
 .brand strong { display: block; font-size: 16px; letter-spacing: -.02em; }
 .brand span:not(.brand-mark):not(.brand-dot) { display: block; font-size: 12px; color: #9fb2c4; letter-spacing: .02em; }
+.topbar-actions { display: flex; align-items: center; gap: 18px; }
+.topbar-link { display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; border: 1px solid #3d5a72; border-radius: 9px; color: #d6ecf1; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.topbar-link:hover { background: #1b3046; color: #fff; }
 .role-control { display: flex; align-items: center; gap: 12px; }
 .topbar-label { text-transform: uppercase; letter-spacing: .1em; font-size: 11px; color: #aabecf; font-weight: 700; }
 .control-select { height: 41px; border-radius: 9px; background: #fff; color: #203144; font-size: 14px; box-shadow: none; min-width: 150px; }

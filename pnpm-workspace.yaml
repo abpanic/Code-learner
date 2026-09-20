@@ -1,6 +1,13 @@
 # pnpm 11 reads settings from here rather than the "pnpm" field in package.json.
-# unrs-resolver ships a native binding used by eslint-config-next's import
-# resolver, so its install script has to be allowed to run. Only `pnpm lint`
-# needs it -- `next build` does not run ESLint -- so a deploy is unaffected.
+#
+# Note: `pnpm add` writes a placeholder line here ("set this to true or false")
+# whenever it meets a package with an unapproved build script. Replace the
+# placeholder with a real boolean -- pnpm tolerates the string and stays silent
+# about it otherwise.
+#
+# unrs-resolver: native binding for eslint-config-next's import resolver.
+# esbuild:       bundled by vitest; needs its platform binary unpacked.
+# Neither is needed by `next build`, so deploys are unaffected either way.
 allowBuilds:
+  esbuild: true
   unrs-resolver: true
