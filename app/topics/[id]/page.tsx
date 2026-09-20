@@ -6,12 +6,17 @@ import topicData from "@/data/topics.json";
 import notebookIds from "@/data/notebooks.json";
 import { coreLessons } from "@/data/core-lessons";
 import { problemsForTopic } from "@/data/problems";
+import { getTopicLesson } from "@/data/lessons";
 import { SiteHeader } from "@/app/site-header";
 import { NotebookViewer } from "@/app/notebook-viewer";
 import { TopicProgress } from "../topic-progress";
+import { SubtopicList } from "./subtopic-list";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import "../lesson.css";
 import "../../problems/problems.css";
 import "./topic.css";
+import "./topic-extra.css";
 
 export const dynamic = "force-static";
 
@@ -20,7 +25,9 @@ export const dynamic = "force-static";
  * lessons live in their own folders, and Next prefers those static segments
  * over this dynamic one, so they are simply excluded here.
  */
-const lessonIds = new Set(["lin_reg", ...Object.keys(coreLessons)]);
+// The five Core ML topics still on bespoke routes; C1 moves them into
+// data/lessons and this set empties out.
+const lessonIds = new Set(Object.keys(coreLessons));
 const notebooks = new Set<string>(notebookIds);
 
 const topics = topicData.skillsData.filter((topic) => !lessonIds.has(topic.id));
@@ -44,6 +51,7 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
   const topic = byId.get(id);
   if (!topic) notFound();
 
+  const lesson = getTopicLesson(topic.id);
   const related = problemsForTopic(topic.id);
   const hasNotebook = notebooks.has(topic.id);
 
@@ -64,6 +72,23 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
 
       <div className="topic-columns">
         <div className="topic-main">
+          {lesson && (
+            <section className="topic-section">
+              <div className="topic-overview">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{lesson.overview}</ReactMarkdown>
+              </div>
+              <SubtopicList
+                topicId={topic.id}
+                subtopics={lesson.subtopics.map((subtopic) => ({
+                  id: subtopic.id,
+                  title: subtopic.title,
+                  summary: subtopic.summary,
+                  minutes: subtopic.minutes,
+                }))}
+              />
+            </section>
+          )}
+
           <section className="topic-section">
             <h2>Formula or decision rule</h2>
             <pre className="formula"><code>{topic.formula}</code></pre>
@@ -123,10 +148,12 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
               ))}
             </div>
           </div>
-          <p className="topic-side-note">
-            This topic has no written lesson yet. The prompts above come from the competency
-            matrix; the links fill in as reading is chosen.
-          </p>
+          {!lesson && (
+            <p className="topic-side-note">
+              This topic has no written lesson yet. The prompts above come from the competency
+              matrix; the links fill in as reading is chosen.
+            </p>
+          )}
           <Link href="/topics" className="lesson-end-link">
             <ArrowLeft size={16} /> All topics
           </Link>

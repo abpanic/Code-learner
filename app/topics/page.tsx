@@ -5,6 +5,7 @@ import topicData from "@/data/topics.json";
 import notebookIds from "@/data/notebooks.json";
 import { problems } from "@/data/problems";
 import { coreLessons } from "@/data/core-lessons";
+import { getTopicLesson } from "@/data/lessons";
 import { SiteHeader } from "@/app/site-header";
 import { TopicStatus } from "./topic-status";
 import "./topics-index.css";
@@ -16,8 +17,8 @@ export const metadata: Metadata = {
 
 const notebooks = new Set<string>(notebookIds);
 
-/** lin_reg keeps a bespoke lesson page; the rest are data-driven. */
-const lessonIds = new Set(["lin_reg", ...Object.keys(coreLessons)]);
+/** Topics still on the old single-page lesson route; C1 empties this out. */
+const legacyLessonIds = new Set(Object.keys(coreLessons));
 
 export default function TopicsPage() {
   const problemCounts = new Map<string, number>();
@@ -65,7 +66,17 @@ export default function TopicsPage() {
                 <p>{topic.desc}</p>
                 <div className="topics-card-foot">
                   <div className="topics-badges">
-                    {lessonIds.has(topic.id) && <span className="badge-lesson">Lesson</span>}
+                    {(() => {
+                      const lesson = getTopicLesson(topic.id);
+                      if (lesson) {
+                        return <span className="badge-lesson">
+                          {lesson.subtopics.length} lessons
+                        </span>;
+                      }
+                      return legacyLessonIds.has(topic.id)
+                        ? <span className="badge-lesson">Lesson</span>
+                        : null;
+                    })()}
                     {notebooks.has(topic.id) && (
                       <span className="badge-notebook"><NotebookPen size={12} /> Notebook</span>
                     )}

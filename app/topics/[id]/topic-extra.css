@@ -1,0 +1,34 @@
+.topic-overview { color: var(--ink-2); font-size: 15px; line-height: 1.7; max-width: 68ch; }
+.topic-overview p { margin: 0 0 13px; }
+.topic-overview p:last-child { margin-bottom: 0; }
+
+.subtopic-map { margin-top: 30px; }
+.subtopic-map-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.subtopic-map-head h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; color: var(--ink); }
+.subtopic-map-head span { color: var(--ink-4); font-size: 12.5px; }
+
+.subtopic-cards { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; counter-reset: none; }
+.subtopic-card > a { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.subtopic-card > a:hover { border-color: var(--brand-line); background: var(--brand-surface); }
+.subtopic-index { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: var(--surface-3); color: var(--ink-3); font: 700 12px var(--font-mono); }
+.subtopic-read .subtopic-index { background: var(--ok-surface); color: var(--ok-ink); }
+.subtopic-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.subtopic-body strong { color: var(--ink); font-size: 15px; letter-spacing: -.01em; }
+.subtopic-summary { color: var(--ink-3); font-size: 13px; line-height: 1.5; }
+.subtopic-time { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-4); font-size: 11.5px; }
+.subtopic-read-tag { margin-left: 6px; padding: 1px 6px; border-radius: 4px; background: var(--ok-surface); color: var(--ok-ink); font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.subtopic-arrow { color: var(--ink-4); }
+.subtopic-card > a:hover .subtopic-arrow { color: var(--brand); }
+
+.subtopic-problems { list-style: none; margin: 0; padding: 0; }
+.subtopic-problems li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line-soft); }
+.subtopic-problems li:first-child { border-top: none; }
+.subtopic-problems a { display: inline-flex; align-items: center; gap: 5px; color: var(--ink); font-size: 14px; font-weight: 650; }
+.subtopic-problems a:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+
+.subtopic-links { margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--line); }
+.subtopic-links > strong { display: block; margin-bottom: 9px; color: var(--ink-2); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.subtopic-links > div { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.mark-read { display: flex; align-items: center; gap: 10px; min-height: 36px; margin-top: 20px; }
+.mark-read-done { display: inline-flex; align-items: center; gap: 6px; color: var(--ok-ink); font-size: 13px; font-weight: 700; }

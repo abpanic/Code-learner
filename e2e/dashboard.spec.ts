@@ -93,3 +93,37 @@ test("a topic with problems lists them", async ({ page }) => {
   await expect(list).toHaveCount(4);
   await expect(list.first()).toContainText("Two Sum");
 });
+
+test("a topic map leads into its sub-topic lessons and on to the next", async ({ page }) => {
+  await page.goto("/topics/lin_reg");
+
+  // The topic page is a map, not a lesson.
+  await expect(page.getByRole("heading", { name: "Lessons" })).toBeVisible();
+  const cards = page.locator(".subtopic-card");
+  await expect(cards).toHaveCount(4);
+  await expect(page.locator(".subtopic-map-head span")).toContainText("0 of 4 read");
+
+  await cards.first().click();
+  await expect(page).toHaveURL(/\/topics\/lin_reg\/ols-fit$/);
+  await expect(page.locator(".lesson-heading h1")).toContainText("least squares");
+  // The lesson owns the page outline; an embedded notebook must not add an h1.
+  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+
+  // Opening it records the read.
+  await expect(page.getByText("Marked as read")).toBeVisible();
+
+  // Next walks to the following sub-topic, not the next topic.
+  await page.getByRole("link", { name: /NEXT/ }).click();
+  await expect(page).toHaveURL(/\/topics\/lin_reg\/ridge-lasso-elastic-net$/);
+
+  // Back on the map, progress has moved.
+  await page.goto("/topics/lin_reg");
+  await expect(page.locator(".subtopic-map-head span")).toContainText("2 of 4 read");
+  await expect(page.locator(".subtopic-read")).toHaveCount(2);
+});
+
+test("the topics index counts lessons per topic", async ({ page }) => {
+  await page.goto("/topics");
+  const card = page.locator(".topics-card", { hasText: "Linear Regression" });
+  await expect(card.locator(".badge-lesson")).toContainText("4 lessons");
+});

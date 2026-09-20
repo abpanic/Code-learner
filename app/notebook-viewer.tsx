@@ -24,6 +24,20 @@ type NotebookCell = {
 type Notebook = { nbformat: number; metadata?: Record<string, unknown>; cells: NotebookCell[] };
 const toText = (value?: string | string[]) => Array.isArray(value) ? value.join("") : value || "";
 
+/**
+ * A notebook is embedded inside a page that already has an h1 and h2s, so its
+ * own markdown headings are pushed down two levels. Rendering a notebook's `#`
+ * as a second h1 breaks the page outline for screen readers.
+ */
+const HEADING_SHIFT = {
+  h1: (props: React.ComponentProps<"h3">) => <h3 {...props} />,
+  h2: (props: React.ComponentProps<"h4">) => <h4 {...props} />,
+  h3: (props: React.ComponentProps<"h5">) => <h5 {...props} />,
+  h4: (props: React.ComponentProps<"h6">) => <h6 {...props} />,
+  h5: (props: React.ComponentProps<"h6">) => <h6 {...props} />,
+  h6: (props: React.ComponentProps<"h6">) => <h6 {...props} />,
+} as const;
+
 type ViewState =
   | { status: "loading" }
   | { status: "ready"; notebook: Notebook }
@@ -56,7 +70,7 @@ export function NotebookViewer({ topicId, title, available }: { topicId: string;
     {state.status === "loading" && <p className="notebook-message" role="status">Loading notebook…</p>}
     {state.status === "error" && <p className="notebook-message" role="alert">{state.message}</p>}
     {notebook?.cells.map((cell, index) => <div className={`notebook-cell ${cell.cell_type}`} key={index}>
-      {cell.cell_type === "markdown" && <div className="notebook-markdown"><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{toText(cell.source)}</ReactMarkdown></div>}
+      {cell.cell_type === "markdown" && <div className="notebook-markdown"><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} components={HEADING_SHIFT}>{toText(cell.source)}</ReactMarkdown></div>}
       {cell.cell_type === "code" && <><div className="cell-label">In [{cell.execution_count ?? " "}]</div><pre className="cell-code"><code>{toText(cell.source)}</code></pre>
         {cell.outputs?.map((output, outputIndex) => <div className="cell-output" key={outputIndex}>
           {/* eslint-disable-next-line @next/next/no-img-element -- inline base64 output; next/image cannot optimise data URIs */}
