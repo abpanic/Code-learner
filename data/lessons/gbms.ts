@@ -27,9 +27,18 @@ yourself.`,
       id: "why-boosting-works",
       title: "Correcting your own mistakes",
       summary: "The sequential idea, with why shallow trees suffice.",
-      minutes: 4,
+      minutes: 5,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Two curves that stop agreeing",
+          body: `Train error falls 16027.6, 1188.4, 240.8, 23.8, 1.0 as the ensemble grows from 10 trees to 500. Test error falls too — 21089.7, 8696.5, 6704.0, 6170.1 — and then stops, bottoming out around 6159.9.
+
+By 500 trees the training error is 1.0. The model reproduces its training data almost exactly, and the last line names the cost: the best test error arrived at **303 trees**, and every tree after that made the model worse on data it had not seen.
+
+This is the distinguishing property of boosting. A random forest averages independent trees and cannot overfit by adding more of them. Boosting fits each tree to what remains wrong, so it keeps driving training error down forever, and the number of trees becomes a parameter you must choose rather than one you can set generously.`,
+        },
         {
           id: "sequence",
           heading: "Each tree fixes the last",
@@ -81,6 +90,15 @@ The standard remedy is early stopping: monitor a validation set and halt once it
 improved for some number of rounds. Every major implementation supports it, and using it is
 close to mandatory rather than optional.`,
         },
+        {
+          id: "when-to-boost",
+          heading: "When boosting is the right call",
+          body: `Gradient boosting is the strongest general method for substantial tabular data — mixed types, non-linear relationships, interactions nobody enumerated. Given enough rows and some tuning it usually beats a random forest, which is why it wins most tabular competitions.
+
+The cost is attention. It has more parameters that interact, it needs a validation slice to choose the tree count, and it will quietly overfit if you look away — none of which is true of a forest.
+
+Reach for a forest instead when you want a strong result with almost no tuning, and for something simpler when the data is small. This topic's notebook makes that concrete: on 455 clean rows, all three boosting libraries lose to plain logistic regression.`,
+        },
       ],
       code: {
         caption: "Track validation loss round by round to see where boosting starts hurting.",
@@ -127,10 +145,19 @@ print(f"\\nbest test error at {int(np.argmin(test_error)) + 1} trees")`,
       id: "gradient-boosting-step-by-step",
       title: "The gradient step",
       summary: "Why residuals generalise to any differentiable loss.",
-      minutes: 4,
+      minutes: 5,
       links,
       notebookId: "gbms",
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "The same predictions, arrived at by hand",
+          body: `RMSE falls 2.8395, 2.1323, 1.4510, 1.1809 across four rounds, each tree fitted to what the previous ensemble still got wrong.
+
+Then the check that matters: the hand-rolled predictions and scikit-learn's agree to three decimals on all eight rows — \`3.977 3.977 6.477 6.477 9.977 10.983 13.066 13.066\`. The loop above reproduces a library implementation exactly, which is the strongest evidence that the description of the algorithm is the algorithm.
+
+Notice the repeated values. Eight rows collapse to five distinct predictions because a shallow tree has few leaves and every row landing in the same leaf gets the same number. Boosting refines those numbers round by round; it never produces a smooth function.`,
+        },
         {
           id: "pseudo-residuals",
           heading: "Fitting the gradient, not the error",
@@ -184,6 +211,17 @@ with $\Omega$ penalising leaf count and the magnitude of leaf values. A split ha
 loss by more than it adds in penalty to be accepted, which is a cleaner mechanism than a
 post-hoc depth cap and is why these models can afford to search deeper.`,
         },
+        {
+          id: "when-the-detail-matters",
+          heading: "When you need this level of detail",
+          body: `You will not implement this loop at work. Knowing what it does pays off in three specific places.
+
+Reading the parameters: \`learning_rate\` is the multiplier on each tree's contribution, and once you have watched it scale the update, its trade-off against \`n_estimators\` stops being arbitrary — halve one and you roughly double the other.
+
+Writing a custom objective. Boosting needs a gradient and, for the second-order libraries, a Hessian. Supplying those is a normal thing to do for ranking or for an asymmetric business cost, and it is impossible to do without this picture.
+
+Debugging a fit that will not move. Predictions that stay flat, or explode, trace back to the update step — a learning rate too small to escape the initial guess, or leaves large enough to overshoot on every round.`,
+        },
       ],
       code: {
         caption: "Build the ensemble by hand from stumps, then check it against the library.",
@@ -232,9 +270,18 @@ print("sklearn  :", np.round(reference.predict(X), 3))`,
       id: "xgboost-lightgbm-catboost",
       title: "The three implementations",
       summary: "What each library changed, plus when the difference shows.",
-      minutes: 4,
+      minutes: 5,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Early stopping picks the size for you",
+          body: `Two lines: cross-validated accuracy of 0.997, and \`stopped after 133 iterations of 200\`.
+
+The ceiling was 200 trees and the model used 133. That is early stopping doing its job — watching a validation slice, noticing that the last several rounds bought nothing, and halting. \`n_estimators\` is a budget, not a target, and this is the parameter you should stop hand-tuning first.
+
+An accuracy of 0.997 on a small, clean dataset is not a result to be proud of; it mostly says the problem was easy. The topic's notebook runs all three libraries side by side and shows what actually separates them — LightGBM roughly an order of magnitude faster, CatBoost a little more accurate, none of them beating a linear model on data this size.`,
+        },
         {
           id: "xgboost",
           heading: "XGBoost",
@@ -285,6 +332,19 @@ default with the widest deployment support.
 
 Pick one, learn its parameters properly, and spend the time you saved on the data.`,
         },
+        {
+          id: "which-library-when",
+          heading: "Choosing between the three",
+          body: `They implement the same algorithm, so the choice is about engineering rather than accuracy.
+
+**LightGBM** when the data is large or training time is the binding constraint. Leaf-wise growth and histogram binning make it the fastest of the three by a wide margin, at the cost of needing \`num_leaves\` watched more carefully.
+
+**CatBoost** when categorical columns are high-cardinality. It encodes them with ordered target statistics rather than making you one-hot encode, which is both less work and less leakage. Its defaults are the most forgiving.
+
+**XGBoost** when you want the most documented, most portable, most widely deployed option. It is rarely the fastest and rarely the most accurate, and it is rarely the wrong answer.
+
+Start with whichever your team already runs. The gap between any of them and a well-tuned version of another is smaller than the gap made by tuning.`,
+        },
       ],
       code: {
         caption: "Histogram-based boosting from scikit-learn, with native categorical handling.",
@@ -332,9 +392,18 @@ print(f"stopped after {model.n_iter_} iterations of 200")`,
       id: "tuning-and-regularisation",
       title: "Tuning without fooling yourself",
       summary: "Which parameters matter, in which order.",
-      minutes: 4,
+      minutes: 5,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Two scores, and which one you may report",
+          body: `The search settles on \`max_leaf_nodes: 31\` and \`min_samples_leaf: 20\`, with a cross-validated AUC of 0.9712 and a holdout AUC of 0.9869.
+
+The holdout score is *higher* here, which looks like it contradicts the labels on those lines. It does not, and the reason is worth being precise about. A cross-validated score that a search selected on is biased upward **as an estimate of the selected configuration**, because the winner is partly whichever configuration got the friendliest folds. That bias is real, but it is small next to the sampling noise on a holdout set of this size, so on any single run the holdout can land either side.
+
+The rule survives the arithmetic: the number you report comes from data the search never touched. Run this with a different seed and the two values will trade places, which is the point — one of them is an estimate you may quote, and the other is not, regardless of which happens to be larger.`,
+        },
         {
           id: "order",
           heading: "An order that works",
@@ -383,6 +452,19 @@ the validation split.
 The reliable gains are elsewhere: a feature that encodes something the model cannot derive, a
 leak removed, a target defined more precisely, a validation split that matches how the model will
 actually be used.`,
+        },
+        {
+          id: "what-to-tune-first",
+          heading: "What to tune, in what order",
+          body: `Most of the available gain sits in a few parameters, and searching all of them at once wastes the budget.
+
+Start by fixing a low \`learning_rate\` — 0.05 or 0.03 — and letting early stopping choose the tree count. Those two trade off directly, so tuning them jointly mostly rediscovers that relationship.
+
+Then tune tree capacity: \`max_depth\` or \`max_leaf_nodes\`, together with \`min_samples_leaf\` or its library equivalent. This is where the real differences live, and the two interact, so search them as a grid rather than one after the other.
+
+Then, if there is budget left, the sampling and penalty terms — \`subsample\`, \`colsample_bytree\`, the L1 and L2 weights. These usually buy less than the step before.
+
+Stop earlier than feels comfortable. Past a point the search is fitting the validation folds, and a model tuned to three decimal places on a small dataset has been tuned to noise.`,
         },
       ],
       code: {

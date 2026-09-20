@@ -28,10 +28,19 @@ there are more than two classes.`,
       id: "sigmoid-and-odds",
       title: "From score to probability",
       summary: "How the sigmoid turns an unbounded score into a usable probability.",
-      minutes: 4,
+      minutes: 5,
       links,
       problemSlugs: ["sigmoid"],
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Three numbers for every row",
+          body: `The fit prints coefficients of 1.046 and 0.377, and odds ratios of 2.847 and 1.458.
+
+An odds ratio is the coefficient exponentiated: e to the 1.046 is 2.847. Each extra hour of study multiplies the *odds* of passing by about 2.85, holding prior attempts fixed. That multiplication is constant; the effect on the probability is not, which is the trap the callout below covers.
+
+The last four lines are the same three rows seen three ways. The score runs -2.973, -1.926, -0.503 — that is the linear part, unbounded, in log-odds. The probability runs 0.049, 0.127, 0.377 — the score after the sigmoid. The prediction is 0, 0, 0 — the probability after a threshold. Conflating those three is the most common way to misread this model, and the \`sigmoid check\` line exists to prove the middle step: applying the sigmoid to \`decision_function\` by hand reproduces \`predict_proba\` exactly.`,
+        },
         {
           id: "the-squash",
           heading: "The sigmoid",
@@ -73,6 +82,15 @@ change depending on where you start.`,
             title: "An odds ratio of 2 does not double the probability",
             body: "It doubles p/(1−p). How much the probability itself moves depends entirely on the starting probability, and the effect shrinks as you approach either end.",
           },
+        },
+        {
+          id: "when-to-reach-for-it",
+          heading: "When this is the right model",
+          body: `Logistic regression is the first thing to try on a binary outcome with tabular features. It fits in milliseconds, the coefficients are inspectable, and it returns probabilities rather than bare labels — which matters whenever the threshold is a business decision rather than a default.
+
+That is not faint praise. On the breast-cancer data in this topic's notebook it scores 0.9737, beating a random forest, all three gradient-boosting libraries and a neural network. Reach for something heavier only once a linear boundary is demonstrably not enough.
+
+Move on when the boundary is genuinely curved, when interactions matter and you would have to write them out by hand, or when the input is raw text, audio or pixels — cases where the representation has to be learned rather than supplied.`,
         },
       ],
       code: {
@@ -118,11 +136,20 @@ print("sigmoid check:", np.round(1 / (1 + np.exp(-z)), 3))`,
       id: "bce-and-the-gradient",
       title: "Binary cross-entropy",
       summary: "Where the loss comes from, plus the gradient it produces.",
-      minutes: 4,
+      minutes: 5,
       links,
       problemSlugs: ["binary-cross-entropy"],
       notebookId: "log_reg",
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Two checks, both passing",
+          body: `The first pair is 0.510826 twice: the loss written out by hand against \`sklearn.metrics.log_loss\`. The second pair is 0.015122 twice: the analytic gradient against a finite-difference approximation of the same quantity.
+
+Neither line is decoration. Writing a loss and then confirming it against a library implementation catches sign errors and missing averaging. Checking a gradient against a numerical estimate — nudge the weight by a tiny epsilon each way, divide the change in loss by 2 epsilon — catches the derivative mistakes that otherwise show up only as a model that trains slowly for no visible reason.
+
+Agreement to six decimals is what you want. Agreement to two or three usually means the epsilon is badly sized rather than the gradient being wrong.`,
+        },
         {
           id: "from-likelihood",
           heading: "The loss is a likelihood in disguise",
@@ -175,6 +202,15 @@ maximised by pushing weights toward infinity, so an unpenalised fit will not con
 penalty on the weights keeps the solution finite. As with linear regression, leave the
 intercept unpenalised.`,
         },
+        {
+          id: "which-loss-when",
+          heading: "When this loss, and when another",
+          body: `Binary cross-entropy is the default for any model that outputs a probability for a yes-or-no outcome, and for multi-label problems where each label gets its own independent sigmoid.
+
+Squared error is the tempting alternative and the wrong one here. Paired with a sigmoid it produces a non-convex objective with flat regions, so a confidently wrong prediction generates almost no gradient and the model stops correcting it. Cross-entropy punishes confident mistakes without bound, which is exactly the pressure you want.
+
+Two variants are worth knowing. Hinge loss cares only about the margin and gives no probabilities, which suits a support vector machine. Focal loss down-weights easy examples and is built for extreme imbalance — object detection, where background dwarfs everything. For ordinary imbalance, changing the threshold or the class weights is the simpler fix.`,
+        },
       ],
       code: {
         caption: "Compute the loss by hand, then confirm the gradient formula against the library.",
@@ -225,10 +261,19 @@ print(f"analytic {analytic[0]:.6f}  numeric {numeric:.6f}")`,
       id: "thresholds-and-costs",
       title: "Choosing the operating point",
       summary: "Turning probabilities into decisions using the costs that apply.",
-      minutes: 4,
+      minutes: 5,
       links,
       problemSlugs: ["confusion-counts"],
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "The default threshold is the expensive one",
+          body: `Read the cost column: 146.0 at a threshold of 0.1, rising to 295.0, 412.0 and 523.0. The default of 0.5 costs 412 — nearly three times the cheapest option tested, on the same model with the same predictions.
+
+Nothing about the model changed across those four rows. Only the number a probability is compared against changed, and it moved the bill by a factor of three. That is the whole argument for treating the threshold as a decision rather than a default.
+
+Two cautions. The best value sits at the edge of the range tested, so 0.1 is where the search stopped, not where the optimum is — extend the range downward before believing it. And the last line explains why accuracy is useless here: with a base rate of 15.00%, predicting "negative" for everything scores 85.00% and catches nobody.`,
+        },
         {
           id: "the-choice",
           heading: "0.5 is a default, not an answer",
@@ -279,6 +324,15 @@ That can be the right call, but check the probabilities afterwards if anything d
 depends on them. Often the cleaner path is to fit on the real distribution and move the
 threshold, which changes the decision without disturbing the estimate.`,
         },
+        {
+          id: "when-to-move-it",
+          heading: "When the threshold is worth tuning",
+          body: `Tune it whenever the two errors cost different amounts, which is most of the time outside a textbook. Fraud, disease screening, churn, safety alerts: a miss and a false alarm are not interchangeable, and the cost ratio is the thing that should set the operating point.
+
+Tune it too when capacity is the constraint. If the team can investigate forty cases a day, the threshold is whatever fills forty slots with the highest-probability cases, and no metric argument overrides that.
+
+Leave it at 0.5 when the classes are balanced and the errors cost the same, which is rare. And do not bake a tuned threshold into a model whose probabilities feed something downstream — pass the probability along and let the consumer choose, because a threshold chosen for one decision is wrong for the next one.`,
+        },
       ],
       code: {
         caption: "Sweep the threshold and pick the one that minimises your actual cost.",
@@ -288,7 +342,7 @@ from sklearn.metrics import confusion_matrix, precision_recall_curve
 
 rng = np.random.default_rng(0)
 X = rng.normal(size=(400, 3))
-y = (X[:, 0] + rng.normal(scale=0.8, size=400) > 1.2).astype(int)  # ~12% positive
+y = (X[:, 0] + rng.normal(scale=0.8, size=400) > 1.2).astype(int)  # ~15% positive
 
 model = LogisticRegression().fit(X, y)
 p = model.predict_proba(X)[:, 1]
@@ -304,7 +358,7 @@ precision, recall, thresholds = precision_recall_curve(y, p)
 print(f"\\nbase rate {y.mean():.2%} — accuracy of always-negative: {1 - y.mean():.2%}")`,
         caveats: [
           "The best threshold here is nowhere near 0.5, because the costs are not symmetric. The default cutoff encodes an assumption you probably did not make.",
-          "Always-negative scores 88% accuracy on this data and catches nothing. Whenever positives are rare, accuracy measures the base rate rather than the model.",
+          "Always-negative scores 85% accuracy on this data and catches nothing. Whenever positives are rare, accuracy measures the base rate rather than the model.",
           "Pick the threshold on validation data, then measure the locked rule on a test set. Choosing and reporting on the same split is selection, not evaluation.",
           "Report the threshold with any precision or recall figure. Without it the number cannot be reproduced or compared.",
         ],
@@ -328,9 +382,16 @@ print(f"\\nbase rate {y.mean():.2%} — accuracy of always-negative: {1 - y.mean
       id: "multiclass",
       title: "More than two classes",
       summary: "Extending the same machinery past a binary outcome.",
-      minutes: 3,
+      minutes: 4,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Two ways to spread probability across classes",
+          body: `Multinomial scores 0.973 under cross-validation, one-vs-rest 0.940. Both probability vectors sum to 1.000, but they arrive there differently, and the first row shows it: multinomial gives 0.982 to the winning class where one-vs-rest gives 0.897.
+
+The gap is structural. Softmax couples the classes in a single fit — raising one score necessarily lowers the others, and the model is trained knowing the classes compete. One-vs-rest fits three independent binary models that never see each other, then normalises their outputs afterwards so they add up. The normalisation makes the numbers look like a distribution without the fit having treated them as one, which is why its confidence is more diffuse and its score a little lower here.`,
+        },
         {
           id: "softmax",
           heading: "Softmax generalises the sigmoid",
@@ -365,6 +426,15 @@ If mistaking class A for class B is cheap but mistaking B for A is expensive, th
 minimises expected cost is not "pick the largest". Build the cost matrix explicitly, then pick
 the class minimising expected cost. Calibration matters more here too, because the comparison
 is now between several estimated numbers rather than one against a fixed cutoff.`,
+        },
+        {
+          id: "which-scheme-when",
+          heading: "When to choose which",
+          body: `Use multinomial by default when the classes are mutually exclusive and a single model can be fitted: it optimises the thing you actually care about, and its probabilities are more trustworthy.
+
+Use one-vs-rest when the base algorithm has no native multiclass form, when you need a separate inspectable model per class, or when you want to train and retrain classes independently — adding a fourth class costs one new model instead of a full refit.
+
+Neither applies when labels are not exclusive. An article that is both "politics" and "economics" is a multi-label problem: keep the independent binary models but drop the normalisation, because the probabilities have no reason to sum to 1.`,
         },
       ],
       code: {

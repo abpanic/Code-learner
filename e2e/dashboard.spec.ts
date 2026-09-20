@@ -161,6 +161,8 @@ test("every lesson shows runnable code with its caveats", async ({ page }) => {
   // A variation is offered where one is worth knowing.
   await expect(page.locator(".code-variation .lesson-snippet")).toContainText("X_multi");
 
-  // "In code" is in the table of contents alongside the prose sections.
-  await expect(page.locator(".lesson-side-card")).toContainText("In code");
+  // The code leads the page, so it leads the table of contents too.
+  await expect(page.locator(".lesson-side-card")).toContainText("The code");
+  const order = await page.locator(".lesson-section h2").allTextContents();
+  expect(order[0]).toBe("The code");
 });

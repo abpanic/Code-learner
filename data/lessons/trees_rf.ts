@@ -27,9 +27,18 @@ output any tree model produces.`,
       id: "how-a-tree-splits",
       title: "How a tree chooses a split",
       summary: "Impurity, weighted gain, the greedy search over candidate cuts.",
-      minutes: 4,
+      minutes: 6,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "One split, chosen by arithmetic",
+          body: `\`export_text\` draws the whole model: a single test, \`x <= 4.50\`, with class 0 below it and class 1 above. That is the entire tree.
+
+The two lines underneath show why it landed there. Splitting at 2.5 scores a gain of 0.250; splitting at 4.5 scores 0.500. The tree evaluated candidate thresholds, scored each by how much impurity the split removes, and kept the best one. There is no optimisation over the tree as a whole — just this comparison, repeated greedily at every node.
+
+That greediness is worth holding on to. A split that looks poor now but enables two excellent splits below it will never be chosen, because nothing looks ahead. It is why trees are fast, and why they are unstable.`,
+        },
         {
           id: "impurity",
           heading: "Measuring how mixed a node is",
@@ -91,6 +100,15 @@ fold. Knowing which your library does is worth the five minutes it takes to chec
             body: "The more distinct values a feature has, the more split points it offers, and the easier it is for one to fit noise. This biases both split selection and the importance scores computed from it.",
           },
         },
+        {
+          id: "when-a-single-tree",
+          heading: "When one tree is enough",
+          body: `A lone decision tree earns its place when someone has to read the model. A tree of depth three prints as a handful of if-then rules that a domain expert can check line by line, which is a property no ensemble has and no linear model quite matches.
+
+It is also the right tool when the data is genuinely rule-shaped — thresholds that carry real meaning, such as clinical cut-offs or policy limits.
+
+For accuracy alone, stop here and use a forest. A single tree trades a lot of predictive performance for that readability, and the next two lessons are about buying the performance back.`,
+        },
       ],
       code: {
         caption: "Fit a one-split tree and read the impurity numbers it chose.",
@@ -134,9 +152,18 @@ for threshold in [2.5, 4.5]:
       id: "overfitting-and-pruning",
       title: "Depth, overfitting, pruning",
       summary: "Why an unconstrained tree memorises, with the controls that stop it.",
-      minutes: 4,
+      minutes: 5,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Where training accuracy stops meaning anything",
+          body: `The depth sweep prints train scores of 0.923, 0.979, 0.995 and 1.000, against cross-validated scores of 0.900, 0.917, 0.916 and 0.917.
+
+The training column reaches a perfect 1.000 with 22 leaves. The cross-validated column stops improving after depth 3 and then sits flat. Everything past depth 3 is the tree memorising individual rows — pure gain on data it has already seen, nothing on data it has not.
+
+The pruning sweep is the more useful half. Cost-complexity pruning at alpha 0.0034 scores 0.923, slightly better than any depth limit tested. Growing a tree out and cutting it back finds structure that stopping early misses, because a split that looks weak can still lead somewhere.`,
+        },
         {
           id: "perfect-fit",
           heading: "A deep tree can fit anything",
@@ -187,6 +214,17 @@ it. It is the reason averaging exists, and the subject of the next lesson.`,
             body: "Refit on a bootstrap sample and compare. If the top splits move, the structure is telling you about this sample rather than about the process that generated it.",
           },
         },
+        {
+          id: "which-control-when",
+          heading: "Which knob to reach for",
+          body: `\`max_depth\` is the blunt instrument: quick to reason about, easy to explain, and it applies the same limit to every branch whether or not that branch has the data to support it.
+
+\`min_samples_leaf\` is usually the better default. It scales the constraint to the data — a branch may go deep where there are rows to justify it and gets cut short where there are not. Reach for it first when the classes are imbalanced or the data is unevenly dense.
+
+\`ccp_alpha\` is the principled option, and the one the output above rewards: grow fully, then remove the subtrees that do not pay for themselves. Use \`cost_complexity_pruning_path\` to get the candidate alphas rather than guessing them.
+
+Inside an ensemble the calculus changes. A random forest wants deep, overfitted trees, because averaging is what controls the variance — pruning the members of a forest usually makes it worse.`,
+        },
       ],
       code: {
         caption: "Watch train and validation diverge as depth grows, then prune instead.",
@@ -232,10 +270,19 @@ for alpha in path.ccp_alphas[::max(1, len(path.ccp_alphas) // 4)][:4]:
       id: "bagging-and-random-forests",
       title: "Averaging many trees",
       summary: "What bootstrap sampling buys, with the extra randomness forests add.",
-      minutes: 4,
+      minutes: 5,
       links,
       notebookId: "trees_rf",
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Where the accuracy actually comes from",
+          body: `Four numbers, each adding one idea: a single tree scores 0.917, bagging 0.958, the forest 0.963, and the forest's out-of-bag estimate 0.968.
+
+Bagging is worth four points here. Averaging many trees, each fitted to a different bootstrap sample, cancels out the instability the previous lesson ended on — the errors are partly independent, so they partly cancel. Sampling features at each split adds another half a point on top, by making the trees disagree more.
+
+The second block is the tree-count sweep: 0.566 with one tree, 0.866 with five, 0.963 with twenty-five, 0.968 with a hundred, 0.965 with three hundred. It climbs steeply, then flattens. More trees never hurt accuracy — the last value is noise, not degradation — but past a point they only cost time.`,
+        },
         {
           id: "bagging",
           heading: "Bootstrap aggregation",
@@ -289,6 +336,15 @@ The parameters that matter are the feature-sampling rate and the leaf-size const
 are famously forgiving here; defaults are usually close, and the gains from tuning are modest
 compared with what the same effort spent on features would return.`,
         },
+        {
+          id: "how-many-trees",
+          heading: "Choosing the size, and when a forest fits",
+          body: `Read the sweep as a stopping rule. Add trees until the out-of-bag score stops moving, then stop paying for more; a few hundred is usually past the knee. Because more trees cannot overfit, this is one of the few hyperparameters you can set generously and forget.
+
+Forests fit the ordinary tabular case: mixed feature types, non-linear relationships, outliers, little preprocessing, and no scaling. They are hard to make catastrophically wrong, which makes them a good second thing to try after a linear baseline.
+
+Reach elsewhere when you need calibrated probabilities, since averaging votes pushes them toward the middle; when the model must be readable, which a thousand trees is not; or when gradient boosting's extra accuracy is worth its extra tuning.`,
+        },
       ],
       code: {
         caption: "Compare a single tree, bagging, and a forest, using the free out-of-bag estimate.",
@@ -339,9 +395,22 @@ for n in [1, 5, 25, 100, 300]:
       id: "feature-importance",
       title: "Reading feature importance",
       summary: "What importance scores measure, with the claims they cannot support.",
-      minutes: 4,
+      minutes: 5,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "A duplicate column exposes the difference",
+          body: `Four features, two measures, and one row that does not agree with itself:
+
+\`signal\` scores 0.599 by impurity and +0.475 by permutation — a real feature, and both measures find it. \`noise\` and \`unique_id\` score near zero on both, correctly.
+
+\`duplicate\` is the interesting one: **0.392 by impurity, +0.000 by permutation**. It is \`signal\` with a little noise added, so the forest split on it often and impurity credited it generously. Shuffling it changes nothing, because the cleaner original is still there to use instead.
+
+Notice that the two measures divide the credit differently. Impurity splits it, 0.599 against 0.392. Permutation does not split it at all: it gives \`signal\` +0.475 and \`duplicate\` nothing, because the label depends on \`signal\` exactly and the noisier copy cannot fully stand in for it. Permutation asks what breaks when a feature is corrupted, and the answer depends on what is left.
+
+Neither number is lying. They answer different questions: impurity asks how much this feature was used, permutation asks how much this feature is needed.`,
+        },
         {
           id: "impurity-importance",
           heading: "Built-in importance is biased",
@@ -392,6 +461,17 @@ objectivity that invites exactly this misreading.`,
             body: "\"What is this model leaning on?\" — useful for debugging, auditing and detecting leakage. Not \"what drives the outcome?\", which needs a causal design rather than a fit.",
           },
         },
+        {
+          id: "which-measure-when",
+          heading: "Which measure to trust, and when",
+          body: `Use permutation importance on held-out data when you want to know what the model actually relies on. That is the question behind most uses — pruning a feature set, explaining a model, deciding what to keep collecting.
+
+Use impurity importance only as a cheap, rough view of what the trees used. It comes free with the fit, but it inflates continuous and high-cardinality features, and it is computed on training data, so it credits splits that never generalised.
+
+When features are correlated, neither measure gives a clean answer, and the output above is the proof. Permute correlated columns as a group, or use a grouped method, and read the result as "this group matters" rather than assigning credit within it.
+
+Whichever you use, importance is not effect. A feature can be important to a model because it proxies for something else entirely, and no permutation will reveal that.`,
+        },
       ],
       code: {
         caption: "Compare built-in importance with permutation importance, including on a decoy.",
@@ -421,7 +501,7 @@ for i, name in enumerate(names):
           f"permutation={perm.importances_mean[i]:+.3f}")`,
         caveats: [
           "unique_id is pure noise and still scores on impurity importance, because a column with 500 distinct values offers 499 chances to split the training labels by luck.",
-          "signal and duplicate both show low permutation importance. Shuffling one leaves the other to carry the same information — that is redundancy, not irrelevance.",
+          "duplicate scores +0.000 on permutation while signal scores +0.475, though the two columns are nearly identical. Permutation does not split credit between redundant features — it hands everything to whichever copy the model prefers and nothing to the rest. Read a zero here as redundancy, never as irrelevance.",
           "Permute correlated features as a group, or cluster first and report per cluster, or you will conclude that nothing matters.",
           "Importance says what the model leaned on. It does not say what causes the outcome, and a feature that is a consequence of the target will dominate — which is what leakage looks like.",
         ],

@@ -27,9 +27,20 @@ optimisation behave, and how to build a training loop you can actually trust.`,
       id: "neurons-and-layers",
       title: "The forward pass",
       summary: "What a layer computes, plus why nonlinearity is essential.",
-      minutes: 4,
+      minutes: 5,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Shapes, parameters, and one collapse",
+          body: `Three lines, and the third is the one that matters.
+
+\`X (4, 5) -> z1 (4, 3) -> z2 (4, 2)\` tracks the batch through the network. Four rows stay four rows the whole way; only the feature dimension changes, 5 to 3 to 2. That pattern — first axis is the batch, last axis is what the layer transforms — holds almost everywhere in deep learning.
+
+\`parameters: 26\` is the count: 5x3 weights plus 3 biases in the first layer, 3x2 plus 2 in the second. Worth computing by hand once, because parameter count is what memory and overfitting both scale with.
+
+\`two linear layers == one: True\` is the punchline. Without an activation between them, stacking two linear layers produces a function a single linear layer could already express. Depth bought nothing, which is exactly what the next section is about.`,
+        },
         {
           id: "a-layer",
           heading: "One layer",
@@ -85,6 +96,15 @@ In practice frameworks fold that final activation into the loss function, for nu
 This is why a model's last layer often looks bare in the code, and why applying a softmax before
 a loss that already includes one is a quiet, common bug.`,
         },
+        {
+          id: "when-a-network",
+          heading: "When a network is the right shape",
+          body: `A feedforward network is a general function approximator, which makes it tempting everywhere and correct in fewer places than that suggests.
+
+It earns its keep when the features are not already meaningful — pixels, audio samples, characters, sequences — because the layers learn a representation instead of you engineering one. It also keeps improving with more data, past the point where other tabular methods flatten out.
+
+On ordinary tabular data of modest size it is usually the wrong tool, and this topic's notebook is the evidence: a two-layer network scores 0.9649 on the breast-cancer data, behind logistic regression at 0.9737. Gradient boosting beats networks on tabular problems often enough that it should be the default there, with networks kept for the cases where the representation is the problem.`,
+        },
       ],
       code: {
         caption: "A two-layer forward pass in numpy, with the shapes printed at each step.",
@@ -130,10 +150,21 @@ print("two linear layers == one:", np.allclose(collapsed, linear_only))`,
       id: "backpropagation",
       title: "Backpropagation",
       summary: "The chain rule in reverse, worked on one neuron.",
-      minutes: 4,
+      minutes: 5,
       links,
       notebookId: "dl_fnn",
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "A gradient, checked against arithmetic",
+          body: `The forward pass gives \`z=1.0000\`, \`a=0.7311\`, \`loss=0.036165\`. The backward pass gives \`dL/dw=-0.105754\` and \`dL/db=-0.052877\`.
+
+The next two lines recompute both by finite differences and land on exactly the same figures. That agreement is the point of the cell. Backpropagation is a bookkeeping scheme for the chain rule, and a gradient check — nudge a parameter a little each way, divide the change in loss by twice the nudge — is how you confirm the bookkeeping is right.
+
+Notice the relationship between the two: \`dL/dw\` is exactly twice \`dL/db\`, because the input here is x = 2.0 and the weight's gradient carries a factor of x that the bias's does not. Small consistency checks like that catch real errors early.
+
+Both gradients are negative, meaning the loss falls as the parameter rises, so the update moves both upward.`,
+        },
         {
           id: "the-idea",
           heading: "Reuse, not recomputation",
@@ -194,6 +225,17 @@ is why memory scales with batch size and depth rather than just parameter count.
 that breaks the chain — detaching a tensor, a non-differentiable operation, converting to a plain
 array — silently stops gradients flowing through that path.`,
         },
+        {
+          id: "when-you-need-this",
+          heading: "When this matters in practice",
+          body: `Every framework computes these derivatives for you, and you will almost never write a backward pass. Three situations make the mechanism worth carrying anyway.
+
+Diagnosing a network that will not learn. Flat loss, exploding loss, and loss that moves then stalls all have signatures in the gradients — the vanishing-gradient case below is the most common of them.
+
+Writing a custom layer or loss. The moment you step outside what the library ships, you have to supply what it expects, and a gradient check exactly like this one is how you verify it before training anything expensive.
+
+Reading an error message. Most framework stack traces concern shapes or a broken graph, and both are easier to interpret once you know a backward pass walks the same graph in reverse.`,
+        },
       ],
       code: {
         caption: "Backpropagate one neuron by hand, then verify every gradient numerically.",
@@ -247,9 +289,22 @@ print(f"numeric dL/db={(loss_at(w, b + eps) - loss_at(w, b - eps)) / (2 * eps):+
       id: "activations-and-initialisation",
       title: "Activations, initialisation, optimisers",
       summary: "The choices that decide whether training behaves.",
-      minutes: 4,
+      minutes: 6,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Three initialisations, three fates",
+          body: `Activation variance is measured every four layers, starting near 1.0.
+
+**Too small**: 4.39e-03, then 7.98e-12, then 1.10e-20. The signal has vanished. Twenty layers down there is nothing left for a gradient to travel through.
+
+**Too large**: 4.36e-01, 6.07e-02, 6.48e-03 — shrinking as well, because activations this size are being squashed flat by the nonlinearity. Both failure modes end in a network that does not train.
+
+**He initialisation**: 0.686, 0.800, 0.721. Variance holds roughly steady the whole way down. That is the design goal — scale the starting weights by the fan-in so each layer passes signal on at about the size it received it.
+
+The final line is separate and absolute: \`zero init, distinct column values: 1\`. Initialise every weight to zero and all units in a layer compute the same thing, receive the same gradient, and stay identical forever. Randomness is what breaks that symmetry.`,
+        },
         {
           id: "activations",
           heading: "Which activation",
@@ -304,6 +359,17 @@ training code.`,
             body: "Adam rescales every gradient component, including the penalty's. Decoupling the decay restores the intended uniform pull toward zero, which is exactly the difference AdamW makes.",
           },
         },
+        {
+          id: "what-to-pick",
+          heading: "What to pick, and when to depart from it",
+          body: `The defaults are good and you should usually take them: ReLU in the hidden layers, He initialisation to match, Adam as the optimiser, and a normalisation layer once the network is deep.
+
+Depart for specific reasons. Use GELU or SiLU in transformers, where they are standard and measurably better. Use Leaky ReLU when a large share of units have gone permanently dead. Use tanh when you need a bounded, zero-centred activation, as in some recurrent architectures.
+
+Match initialisation to activation rather than choosing them separately: He for the ReLU family, Xavier for tanh and sigmoid. They are a pair, and mixing them is how you end up in the first column of that output.
+
+The output layer follows the task and nothing else: no activation for regression, sigmoid for binary, softmax for exclusive multiclass.`,
+        },
       ],
       code: {
         caption: "Measure activation variance through a deep stack under three initialisations.",
@@ -357,9 +423,20 @@ print("zero init, distinct column values:", len(np.unique(h)))`,
       id: "the-training-loop",
       title: "Building a loop you can trust",
       summary: "The order of operations, with the checks that catch real bugs.",
-      minutes: 4,
+      minutes: 5,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "A loss curve, descending",
+          body: `Loss falls 0.83954, 0.18104, 0.05454, 0.02431 across 300 steps, sampled every hundred.
+
+The shape matters more than the values. It drops steeply and then flattens: most of the progress arrives early and later steps buy progressively less. That is the normal shape of gradient descent on a problem it can solve.
+
+Two other shapes are worth recognising, because they are the ones you will actually meet. Flat from the very start means the learning rate is too small, the inputs are unscaled, or the gradient never reaches the parameters. Loss that rises, oscillates, or becomes \`nan\` means the learning rate is too large and every step overshoots.
+
+This loss is measured on training data, so it says the optimiser is working. It says nothing about generalisation — for that you need the same curve on held-out data, and the gap between the two is what overfitting looks like.`,
+        },
         {
           id: "the-loop",
           heading: "What each step does",
@@ -406,6 +483,19 @@ Also log gradient norms occasionally. A norm collapsing toward zero or growing w
 identifies vanishing or exploding gradients directly, rather than leaving you to infer them from
 the loss curve. Set a seed and record it, so that when a run behaves strangely you can tell
 whether it reproduces.`,
+        },
+        {
+          id: "what-to-reach-for",
+          heading: "Which knob, for which symptom",
+          body: `The loop has a handful of controls, and they map onto symptoms rather than being tuned in the abstract.
+
+Learning rate first, always. It is the parameter that most often decides whether a network trains at all, and the loss curve tells you which direction to move it. Decaying it over training is close to free improvement.
+
+Batch size trades gradient noise against hardware efficiency. Larger batches give smoother gradients and faster epochs; smaller ones add noise that often generalises slightly better. Pick the largest that fits and move on.
+
+Reach for regularisation only once training and validation loss have visibly diverged — weight decay, dropout, or simply stopping early. Applying it before you have seen that gap is guessing.
+
+If the loss is flat rather than plateauing, none of these is the answer: check the data pipeline and the input scaling before touching anything inside the loop.`,
         },
       ],
       code: {

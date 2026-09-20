@@ -27,10 +27,19 @@ that is otherwise order-blind, what a full block contains, and where the costs a
       id: "attention",
       title: "Scaled dot-product attention",
       summary: "Queries, keys, values — the computation that mixes tokens.",
-      minutes: 4,
+      minutes: 5,
       links,
       notebookId: "transformers",
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "What the scale factor is for",
+          body: `Two numbers make the case: the largest attention weight is **0.48 scaled** and **0.982 unscaled**.
+
+Same scores, same softmax, one division by the square root of the head dimension. Without it the scores spread far enough apart that softmax saturates — 0.982 on one token means the rest receive almost nothing, and a distribution that lopsided has vanishingly small gradients. Training stalls. Dividing keeps the scores in a range where softmax stays soft and every token still contributes.
+
+The last line, \`row 1 attends to: [0.619 0.381 0. 0.]\`, is causal masking working. Position 1 distributes its attention across positions 0 and 1 and gives exactly zero to positions 2 and 3, which lie in its future. The zeros are exact rather than small because the masked scores were set to negative infinity before the softmax, not merely reduced.`,
+        },
         {
           id: "qkv",
           heading: "Three projections of the same input",
@@ -87,6 +96,15 @@ positions are masked so they contribute nothing. Masking bugs are quietly severe
 can see one token ahead will show excellent validation loss and generate nonsense, because the
 crutch it learned to use is gone at inference.`,
         },
+        {
+          id: "when-attention",
+          heading: "What attention buys, and what it costs",
+          body: `Attention exists to let a position draw on any other position directly, in one step. A recurrent network has to carry information along a chain, degrading it; attention connects any two tokens with a single operation, which is why long-range dependencies became tractable.
+
+It also parallelises. Every position is computed at once rather than in sequence, which is the property that made training on internet-scale corpora possible and is most of why transformers displaced RNNs.
+
+The cost is quadratic. Every token attending to every token means the score matrix grows with the square of the sequence length — the constraint the fourth lesson is entirely about. When sequences are short and order is strictly local, a convolution is cheaper and often just as good.`,
+        },
       ],
       code: {
         caption: "Scaled dot-product attention in numpy, with and without the scale.",
@@ -137,9 +155,18 @@ print("row 1 attends to:", masked[1].round(3))`,
       id: "multi-head-and-position",
       title: "Multiple heads, plus position",
       summary: "Why several attention patterns run in parallel.",
-      minutes: 4,
+      minutes: 5,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Heads split the width; position is not free",
+          body: `\`x (5, 64) -> heads (8, 5, 8)\` shows the split. Five tokens of width 64 become eight heads, each seeing all five positions in a subspace of width 8. The heads divide the existing width rather than adding to it, so eight heads cost about what one wide head would — you are buying several different attention patterns, not more capacity.
+
+The second line is the sharper one. \`score(0,1) -0.5147\` and \`score(2,3) 3.2942\`, marked \`<- same distance\`. Two pairs of tokens sit one position apart and receive completely different scores. Attention is a weighted sum over a set; nothing in the operation knows that position 1 follows position 0. Without a positional signal, "the dog bit the man" and "the man bit the dog" are the same input.
+
+That is why position has to be injected deliberately, and why the two sections below are about how.`,
+        },
         {
           id: "heads",
           heading: "One attention pattern is not enough",
@@ -189,6 +216,17 @@ is the common choice in current large models.`,
             title: "Relative beats absolute for most tasks",
             body: "\"Three tokens back\" is usually the meaningful relationship, not \"position 847\". Encodings that express distance directly generalise past their training length more gracefully.",
           },
+        },
+        {
+          id: "which-encoding",
+          heading: "Which positional scheme, and when",
+          body: `Learned absolute embeddings are the simplest: one vector per position, added to the token embedding. They work well and fail hard past the length they were trained on, since position 5000 has no embedding if training stopped at 2048. BERT-family models use them.
+
+Sinusoidal encodings are fixed rather than learned, which lets them be evaluated at any position. They extrapolate somewhat better and cost no parameters.
+
+Rotary encodings are the current default for large language models, and for a structural reason: rotating queries and keys makes the attention score depend on the *relative* offset between two tokens rather than their absolute indices. Relative position is usually what actually matters, and it extends to longer contexts more gracefully — which is why context-window extensions are typically described in terms of modifying rotary frequencies.
+
+Choose learned absolute for a fixed-length encoder, rotary for anything generative or long-context.`,
         },
       ],
       code: {
@@ -240,9 +278,20 @@ print("score(0,1)", round(float(scores[0, 1]), 4),
       id: "the-block",
       title: "Inside a transformer block",
       summary: "The residual stream, normalisation, the feedforward layer.",
-      minutes: 4,
+      minutes: 6,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Why deep stacks moved the normalisation",
+          body: `Activation standard deviation, measured at three depths, under the two arrangements:
+
+Depth 1 is unremarkable — 1.601 pre-norm against 1.000 post-norm. By depth 12 the pre-norm stack reaches 10.563, and by depth 48 it reaches **43.161**. Post-norm holds at exactly 1.000 throughout.
+
+The growth is the residual stream doing its job. Each block adds its output to the stream rather than replacing it, so the magnitude accumulates with depth. Post-norm normalises after that addition, which pins the scale — and is also what makes deep post-norm stacks hard to train without a careful warmup, because the normalisation sits directly on the gradient path.
+
+Pre-norm normalises the input to each sublayer and leaves the residual stream untouched, letting it grow. That growing stream is precisely what gives gradients a clean path from the loss back to the earliest layers, and it is why essentially every large model built since GPT-2 is pre-norm despite the original paper using post-norm.`,
+        },
         {
           id: "two-sublayers",
           heading: "Attention then feedforward",
@@ -292,6 +341,17 @@ The expansion is where most of the parameter count lives, and it is widely read 
 storage: attention decides what information to gather, the feedforward layer decides what to do
 with it. Modern variants often use gated activations such as SwiGLU and adjust the width to keep
 the parameter count comparable.`,
+        },
+        {
+          id: "which-arrangement",
+          heading: "Reading a block you did not write",
+          body: `Almost every architecture you meet is this block repeated, so the useful skill is spotting the variations.
+
+Assume pre-norm unless told otherwise. It trains stably at depth without warmup schedules, which is why it won.
+
+Expect the feedforward sublayer to be roughly four times the model width, and to hold about two-thirds of the parameters. When a paper claims a parameter saving, that is usually where it came from — and it is what mixture-of-experts replaces, routing each token to a subset of expert feedforward networks.
+
+Expect RMSNorm rather than LayerNorm in recent models: it drops the mean-centring, costs less, and performs the same. And expect a gated activation such as SwiGLU in the feedforward sublayer, which is why its width is often quoted as an awkward multiple rather than a clean 4x.`,
         },
       ],
       code: {
@@ -348,9 +408,22 @@ for depth in [1, 12, 48]:
       id: "cost-and-context-length",
       title: "Where the cost goes",
       summary: "Quadratic attention, the KV cache, the usual remedies.",
-      minutes: 4,
+      minutes: 5,
       links,
       sections: [
+        {
+          id: "what-it-printed",
+          heading: "Where the wall actually is",
+          body: `Three columns, growing at three different rates as the context goes from 512 tokens to 131,072.
+
+The feedforward column grows linearly: 0.07, 0.27, 1.10, 4.40, 17.59 teraflops. Sixteen times the tokens, sixteen times the arithmetic. Nothing alarming.
+
+The attention-scores column does something else entirely: 0.02 GB, 0.27, 4.29, 68.72, and finally **1099.51 GB**. That is the quadratic term, and it is the reason long context is hard. At 128k tokens the score matrices alone would need more than a terabyte, which no accelerator has.
+
+The KV cache grows linearly — 0.27 GB to 68.72 GB — but it is the number that decides how many concurrent requests a served model can hold, because it is per-request and it persists for the whole generation.
+
+The closing line compresses it: doubling the tokens doubles the feedforward cost and quadruples the attention scores.`,
+        },
         {
           id: "quadratic",
           heading: "The quadratic term",
@@ -397,6 +470,19 @@ task, and none has displaced full attention as the default.
 Worth separating two claims: a model that accepts 128k tokens can process them, which does not
 mean it uses them well. Retrieval accuracy tends to sag in the middle of a long context, so
 context length is a capability ceiling rather than a guarantee.`,
+        },
+        {
+          id: "what-to-do-about-it",
+          heading: "Which lever applies to which cost",
+          body: `The three columns have three different fixes, and reaching for the wrong one wastes effort.
+
+For the quadratic memory, FlashAttention is the near-universal answer and it is already the default in serious implementations. It never materialises the full score matrix, computing attention in tiles instead — so that 1099.51 GB never has to exist. The arithmetic is unchanged; only the memory is.
+
+For the KV cache, the levers are architectural: grouped-query or multi-query attention share key and value heads across query heads and cut the cache by large factors, which is why nearly every recent model uses them. Quantising the cache helps again.
+
+For the feedforward cost, there is no trick — it is real arithmetic, and it scales with tokens.
+
+Before any of that, ask whether you need the context. Retrieval over a short window is usually cheaper and often more accurate than a very long prompt, because attention spread across 100,000 tokens dilutes. Long context is a capability, not a default.`,
         },
       ],
       code: {
