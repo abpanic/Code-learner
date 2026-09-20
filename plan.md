@@ -6,7 +6,7 @@ tests. Theory, explanation and "learn more" are **links only**, and every one of
 as the literal token `<placeholder>` until real URLs are chosen.
 
 Audience: whoever picks up this repo next (you, or a collaborator).
-Status: planning. Phase 0 is partially done (see [Where we are now](#where-we-are-now)).
+Status: **Phase 0 complete** (branch `phase-0-vercel-migration`). Phase 1 is next.
 
 ---
 
@@ -39,9 +39,8 @@ follow; none of them block starting Phase 0.
 
 ## 3. Where we are now
 
-**Stack today:** Next 16 App Router source, but built by **vinext + Vite + Cloudflare
-Workers** (the OpenAI Sites starter), static-exported to `dist/client`. This is the single
-biggest thing standing between the repo and Vercel.
+**Stack today:** stock **Next.js 16** App Router, built with `next build`. Phase 0 removed
+the vinext + Vite + Cloudflare Workers layer the project started on.
 
 **Already fixed (this pass):**
 
@@ -261,9 +260,10 @@ code so the palette and stat tiles are consistent.
 Each phase ends in something deployable. Do not start the next until the acceptance
 criteria hold.
 
-### Phase 0 — Vercel migration (est. 1 day) ⟵ **start here**
+### Phase 0 — Vercel migration ✅ done
 
-The repo currently builds through vinext + Cloudflare. Vercel needs plain Next.
+Landed in `0bbef61`. 21 files changed, 3417 deletions against 140 insertions — the phase
+deleted far more than it added, as expected.
 
 1. `git add -A && git commit` the current tree — **do this first**; only `LICENSE` is
    committed today, so every fix above is one `rm` from gone.
@@ -285,10 +285,11 @@ The repo currently builds through vinext + Cloudflare. Vercel needs plain Next.
 7. Import the repo in Vercel. Framework preset: Next.js. Build command inherits from
    `package.json`. Node 22. No env vars needed yet.
 
-**Done when:** `pnpm build` runs through `next build`, `pnpm lint` is clean, all 7 existing
-routes render on a Vercel preview URL, and notebook downloads still work from `/notebooks/`.
+**Verified:** `pnpm lint`, `pnpm typecheck` and `pnpm build` are clean; `next start` serves
+all 7 routes plus `/notebooks/*.ipynb`. Remaining: import the repo in Vercel (step 7) — that
+needs your account.
 
-### Phase 1 — Problem infrastructure (est. 3–4 days)
+### Phase 1 — Problem infrastructure (est. 3–4 days) ⟵ **start here**
 
 1. `data/problems/` + the `Problem` type + a `scripts/build-problem-manifest.mjs` that
    validates every problem (unique slug, known `topicIds`, ≥3 tests, all three `links` keys
@@ -368,7 +369,8 @@ Nothing exists today. Minimum worth having:
 
 ## 12. Immediate next actions
 
-1. **Commit the current tree.** Nothing but `LICENSE` is in git.
-2. Phase 0, steps 1–7. Get a Vercel preview URL up with what already exists.
-3. Author two problems by hand before building the list page — the data shape in Section 6
+1. Merge `phase-0-vercel-migration` and import the repo in Vercel (Next.js preset, Node 22,
+   no env vars) to get a preview URL for what already exists.
+2. Author two problems by hand before building the list page — the data shape in Section 6
    is a guess until real content pushes back on it.
+3. Decide D1–D6 in Section 2, or accept the defaults by leaving them.
