@@ -6,7 +6,7 @@ tests. Theory, explanation and "learn more" are **links only**, and every one of
 as the literal token `<placeholder>` until real URLs are chosen.
 
 Audience: whoever picks up this repo next (you, or a collaborator).
-Status: **Phases 0 and 1 complete.** Phase 2 (editor + runner) is next.
+Status: **Phases 0, 1 and 2 complete.** Phase 3 (dashboard + IA) is next.
 
 ---
 
@@ -89,7 +89,7 @@ Routes marked **new** do not exist yet. `(…)` denotes a route group, `[…]` a
 |---|---|---|---|---|---|
 | `/` | **replace** | Learner dashboard — the home screen | `StreakCard`, `SolvedByDifficulty`, `TopicHeatmap`, `ReviewQueue`, `ContinueWhereYouLeftOff` | attempts + progress store | 3 |
 | `/problems` | done | Sortable, filterable problem list (the LeetCode table) | `ProblemTable`, `ProblemFilters`, `StatusPill` | `data/problems/*` | 1 |
-| `/problems/[slug]` | partial | The workspace — *this is the product* | `ProblemPane`, `CodeEditor`, `RunBar`, `TestResults`, `PlaceholderLinks` | `data/problems/<slug>` | 1–2 |
+| `/problems/[slug]` | done | The workspace — *this is the product* | `ProblemPane`, `CodeEditor`, `RunBar`, `TestResults`, `PlaceholderLinks` | `data/problems/<slug>` | 1–2 |
 | `/topics` | **new** | Curriculum view — the 70 topics, each with its problem count | `TopicGrid`, `DomainSection`, `EvidenceSelect` | `data/topics.json` | 3 |
 | `/topics/[id]` | **keep + extend** | Existing six ML lessons; all 70 get a problems list + `<placeholder>` theory links | `LessonShell`, `ProblemsForTopic`, `PlaceholderLinks` | `core-lessons.ts`, problems | 3 |
 | `/matrix` | **move** | Today's tracker UI, relocated off `/` | existing `Tracker` | progress store | 3 |
@@ -311,7 +311,7 @@ at module load rather than in a separate `build-problem-manifest.mjs` — a `.mj
 cannot read the `.ts` problem files without extra tooling, and import-time validation fails
 the build just as hard. The DSA topic id is `dsa_arrays_ptrs`, not `dsa_arrays`.
 
-### Phase 2 — The workspace (est. 4–5 days) ⟵ **start here**
+### Phase 2 — The workspace ✅ done
 
 1. CodeMirror 6 + Python/JS modes, tab-size and bracket config, `Cmd/Ctrl+Enter` = Run.
 2. `lib/runner/` per Section 7: worker, protocol, Python harness, JS harness, watchdog.
@@ -320,10 +320,17 @@ the build just as hard. The DSA topic id is `dsa_arrays_ptrs`, not `dsa_arrays`.
    disabled chip with a tooltip, never a dead `<a href>`.
 5. Wire a pass to `attempts.status = "solved"`.
 
-**Done when:** a learner can open a problem cold, hit Run, watch Pyodide boot, see per-test
-results, close the tab, return, and find their code where they left it.
+**Verified** by two Playwright smoke tests against a real browser: cold open, starter fails
+0/4, pasted solution passes 4/4, Submit runs the hidden case for 5/5, reload restores the
+buffer, and the list shows Solved. A second test confirms `while True:` is stopped at 10s
+rather than wedging the tab. 109 unit tests, including the Python harness driven against
+real CPython-in-WASM.
 
-### Phase 3 — Dashboard and IA (est. 2–3 days)
+One change from the plan: `/api/run` stays absent as intended, and the worker deliberately
+does no grading — it reports raw return values and `lib/runner/compare.ts` decides. That is
+what lets the live runner and the build-time solution tests share one rule set.
+
+### Phase 3 — Dashboard and IA (est. 2–3 days) ⟵ **start here**
 
 1. Move `Tracker` to `/matrix`; build the dashboard at `/`; add the `/?topic=` redirect.
 2. Cards per Section 8.
@@ -354,8 +361,7 @@ Nothing exists today. Minimum worth having:
 - **Runner contract tests** — for each seed problem, the reference `solution` must pass
   100% of its own tests. This catches broken test data at build time and is the single
   highest-value test in the project.
-- **Playwright smoke** — load a problem, run the starter, assert a failure; paste the
-  solution, run, assert a pass.
+- **Playwright smoke** — done in Phase 2 (`pnpm e2e`); uses the locally installed Chrome.
 - **GitHub Actions** on push/PR: `pnpm install --frozen-lockfile && pnpm lint && npx tsc
   --noEmit && pnpm test && pnpm build`. The two blocking bugs found in review would both
   have been caught by this.
