@@ -10,6 +10,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 const PAGES = [
   "/",
+  "/topics/lin_reg/ols-fit",
   "/problems",
   "/problems/two-sum-indices",
   "/topics",
@@ -186,3 +187,46 @@ test("the theme toggle persists across a reload", async ({ page }) => {
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });
+
+
+/**
+ * Document outline.
+ *
+ * Markdown and notebook cells both start their headings at `#`. Embedded in a
+ * page that already has an h1, that silently produces a second top-level
+ * heading — which is how the outline drifts without anything looking broken.
+ * Checking every page is the only way this stays fixed.
+ */
+for (const path of PAGES) {
+  test(`has a single, unbroken heading outline on ${path}`, async ({ page }) => {
+    await page.goto(path);
+    await expect(page.locator("#main")).toBeVisible();
+
+    const headings = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"))
+        .filter((el) => {
+          const style = getComputedStyle(el);
+          return style.display !== "none" && style.visibility !== "hidden";
+        })
+        .map((el) => ({
+          level: Number(el.tagName[1]),
+          text: (el.textContent ?? "").trim().slice(0, 50),
+        })),
+    );
+
+    const h1s = headings.filter((h) => h.level === 1);
+    expect(h1s.map((h) => h.text), "exactly one h1 per page").toHaveLength(1);
+
+    // A jump from h2 straight to h4 leaves a hole in the outline.
+    const skips: string[] = [];
+    for (let i = 1; i < headings.length; i += 1) {
+      const jump = headings[i].level - headings[i - 1].level;
+      if (jump > 1) {
+        skips.push(
+          `h${headings[i - 1].level} "${headings[i - 1].text}" -> h${headings[i].level} "${headings[i].text}"`,
+        );
+      }
+    }
+    expect(skips, "heading levels should not skip").toStrictEqual([]);
+  });
+}

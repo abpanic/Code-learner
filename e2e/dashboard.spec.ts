@@ -106,8 +106,6 @@ test("a topic map leads into its sub-topic lessons and on to the next", async ({
   await cards.first().click();
   await expect(page).toHaveURL(/\/topics\/lin_reg\/ols-fit$/);
   await expect(page.locator(".lesson-heading h1")).toContainText("least squares");
-  // The lesson owns the page outline; an embedded notebook must not add an h1.
-  await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
 
   // Opening it records the read.
   await expect(page.getByText("Marked as read")).toBeVisible();

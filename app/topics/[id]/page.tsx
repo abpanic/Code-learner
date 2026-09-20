@@ -13,6 +13,7 @@ import { TopicProgress } from "../topic-progress";
 import { SubtopicList } from "./subtopic-list";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { HEADINGS_UNDER_TITLE } from "@/app/markdown-headings";
 import "../lesson.css";
 import "../../problems/problems.css";
 import "./topic.css";
@@ -75,7 +76,7 @@ export default async function TopicPage({ params }: { params: Promise<{ id: stri
           {lesson && (
             <section className="topic-section">
               <div className="topic-overview">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{lesson.overview}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={HEADINGS_UNDER_TITLE}>{lesson.overview}</ReactMarkdown>
               </div>
               <SubtopicList
                 topicId={topic.id}

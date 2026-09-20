@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, Lock } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { HEADINGS_UNDER_TITLE } from "@/app/markdown-headings";
 import topicData from "@/data/topics.json";
 import { getProblem, problems } from "@/data/problems";
 import { isPlaceholder, visibleTests, type Problem } from "@/data/problems/types";
@@ -96,7 +97,7 @@ export default async function ProblemPage({ params }: { params: Promise<{ slug: 
 
       <div className="problem-body">
         <section className="problem-prompt">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{problem.prompt}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={HEADINGS_UNDER_TITLE}>{problem.prompt}</ReactMarkdown>
           <PlaceholderLinks problem={problem} />
         </section>
 

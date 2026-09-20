@@ -11,18 +11,12 @@ import { allSubtopicParams, getSubtopic, getTopicLesson, subtopicNeighbours } fr
 import { getProblem } from "@/data/problems";
 import { isPlaceholder } from "@/data/lessons/types";
 import { NotebookViewer } from "@/app/notebook-viewer";
+import { HEADINGS_UNDER_SECTION } from "@/app/markdown-headings";
 import { LessonShell } from "../../lesson-shell";
 import { MarkRead } from "./mark-read";
 import "./subtopic.css";
 
 export const dynamic = "force-static";
-
-/** Section bodies sit under an h2, so any heading an author writes starts at h3. */
-const SECTION_HEADINGS = {
-  h1: (props: React.ComponentProps<"h3">) => <h3 {...props} />,
-  h2: (props: React.ComponentProps<"h3">) => <h3 {...props} />,
-  h3: (props: React.ComponentProps<"h4">) => <h4 {...props} />,
-} as const;
 
 const topicTitles = new Map(topicData.skillsData.map((topic) => [topic.id, topic.title]));
 const topicDomains = new Map(topicData.skillsData.map((topic) => [topic.id, topic.domainName]));
@@ -90,7 +84,7 @@ export default async function SubtopicPage(
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath]}
             rehypePlugins={[rehypeKatex]}
-            components={SECTION_HEADINGS}
+            components={HEADINGS_UNDER_SECTION}
           >
             {section.body}
           </ReactMarkdown>

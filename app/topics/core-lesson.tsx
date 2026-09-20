@@ -2,12 +2,13 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import { HEADINGS_UNDER_SECTION } from "@/app/markdown-headings";
 import { NotebookViewer } from "@/app/notebook-viewer";
 import { coreLessons, type CoreLessonId } from "@/data/core-lessons";
 import { LessonShell } from "./lesson-shell";
 
 function Markdown({ children }: { children: string }) {
-  return <div className="core-markdown"><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{children}</ReactMarkdown></div>;
+  return <div className="core-markdown"><ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]} components={HEADINGS_UNDER_SECTION}>{children}</ReactMarkdown></div>;
 }
 
 export function CoreLessonPage({ topicId }: { topicId: CoreLessonId }) {
