@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { problems, validateProblems } from "./index";
 import { toleranceFor, type Problem, type TestCase } from "./types";
+import { findMismatch } from "@/lib/runner/compare";
 
 /**
  * The highest-value test in the project: every reference solution has to pass
@@ -18,21 +19,11 @@ function runSolution(problem: Problem, test: TestCase): unknown {
 }
 
 function expectMatches(actual: unknown, expected: unknown, tolerance: number | undefined) {
-  if (tolerance !== undefined && typeof expected === "number") {
-    expect(typeof actual).toBe("number");
-    expect(Math.abs((actual as number) - expected)).toBeLessThanOrEqual(tolerance);
-    return;
-  }
-  if (tolerance !== undefined && Array.isArray(expected)) {
-    expect(Array.isArray(actual)).toBe(true);
-    const got = actual as number[];
-    expect(got).toHaveLength(expected.length);
-    expected.forEach((value, i) => {
-      expect(Math.abs(got[i] - (value as number))).toBeLessThanOrEqual(tolerance);
-    });
-    return;
-  }
-  expect(actual).toStrictEqual(expected);
+  // Same comparison the live runner uses, so a solution that passes here
+  // passes in the browser for identical reasons.
+  const mismatch = findMismatch(actual, expected, tolerance);
+  expect(mismatch && `${mismatch.path}: got ${mismatch.actual}, expected ${mismatch.expected}`)
+    .toBeNull();
 }
 
 describe("problem data", () => {

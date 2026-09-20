@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, FlaskConical, Lock } from "lucide-react";
+import { ArrowLeft, Lock } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import topicData from "@/data/topics.json";
 import { getProblem, problems } from "@/data/problems";
-import {
-  LANGUAGE_LABELS,
-  isPlaceholder,
-  languagesOf,
-  visibleTests,
-  type Problem,
-} from "@/data/problems/types";
+import { isPlaceholder, visibleTests, type Problem } from "@/data/problems/types";
 import { TopicProgress } from "@/app/topics/topic-progress";
+import { Workspace } from "./workspace";
 import "../../topics/lesson.css";
 import "../problems.css";
 import "./problem.css";
@@ -68,7 +63,6 @@ export default async function ProblemPage({ params }: { params: Promise<{ slug: 
   const problem = getProblem(slug);
   if (!problem) notFound();
 
-  const languages = languagesOf(problem);
   const shown = visibleTests(problem);
   const hiddenCount = problem.tests.length - shown.length;
   const primaryTopic = problem.topicIds[0];
@@ -114,26 +108,7 @@ export default async function ProblemPage({ params }: { params: Promise<{ slug: 
           <PlaceholderLinks problem={problem} />
         </section>
 
-        <section className="problem-code" aria-label="Starter code">
-          <div className="runner-notice" role="note">
-            <FlaskConical size={16} aria-hidden="true" />
-            <p>
-              The in-browser editor and test runner arrive in the next phase. Until then,
-              copy the starter into your own environment — the cases below are the ones it
-              will be graded against.
-            </p>
-          </div>
-          {languages.map((language) => {
-            const impl = problem.languages[language]!;
-            return <div className="starter-block" key={language}>
-              <div className="starter-head">
-                <strong>{LANGUAGE_LABELS[language]}</strong>
-                <code>{impl.entry}</code>
-              </div>
-              <pre><code>{impl.starter.trimEnd()}</code></pre>
-            </div>;
-          })}
-        </section>
+        <Workspace problem={problem} />
       </div>
 
       <section className="problem-tests" aria-label="Test cases">
