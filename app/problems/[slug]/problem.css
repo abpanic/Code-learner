@@ -1,4 +1,4 @@
-.problem-detail { max-width: var(--page-max); margin: 0 auto; padding: 22px clamp(20px, 4vw, 56px) 64px; }
+.problem-detail { width: var(--page-width); margin: 0 auto; padding: 22px var(--page-gutter) 64px; }
 
 .problem-head { margin: 10px 0 22px; }
 .problem-head h1 { margin: 0 0 11px; font-size: 32px; letter-spacing: -.03em; line-height: 1.2; }

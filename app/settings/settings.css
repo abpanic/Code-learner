@@ -1,4 +1,4 @@
-.settings-page { max-width: 760px; margin: 0 auto; padding: 26px clamp(20px, 4vw, 56px) 70px; }
+.settings-page { width: min(94%, 88ch); margin: 0 auto; padding: 26px clamp(20px, 4vw, 56px) 70px; }
 .settings-heading h1 { margin: 2px 0 0; font-size: 32px; letter-spacing: -.03em; }
 .settings { display: flex; flex-direction: column; gap: 14px; margin-top: 22px; }
 

@@ -1,4 +1,4 @@
-.review-page { max-width: 860px; margin: 0 auto; padding: 26px clamp(20px, 4vw, 56px) 70px; }
+.review-page { width: min(94%, 100ch); margin: 0 auto; padding: 26px clamp(20px, 4vw, 56px) 70px; }
 .review-heading h1 { margin: 2px 0 8px; font-size: 32px; letter-spacing: -.03em; }
 .review-heading .heading-copy { margin: 0; max-width: 64ch; color: var(--ink-3); font-size: 14px; line-height: 1.6; }
 .review-list { margin-top: 22px; }

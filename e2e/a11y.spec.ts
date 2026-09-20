@@ -236,6 +236,10 @@ for (const path of PAGES) {
  * narrow column of text with most of the screen empty. Prose still needs a
  * readable measure, so the check is that the *page* uses the width and the
  * *paragraph* does not exceed a comfortable line length.
+ *
+ * The shell is a share of the screen, so these assert a proportion rather than
+ * a pixel count -- a test that names one number just re-states whichever number
+ * the stylesheet happens to hold, and passes on a monitor nobody owns.
  */
 test.describe("wide screens", () => {
   test.use({ viewport: { width: 1920, height: 1000 } });
@@ -254,8 +258,10 @@ test.describe("wide screens", () => {
           return el ? el.getBoundingClientRect().width : 0;
         }));
       });
-      // One shared shell width, so nothing jumps as you navigate.
-      expect(Math.round(width)).toBe(1560);
+      // One shared share of the viewport, so nothing jumps as you navigate.
+      const viewport = page.viewportSize()!.width;
+      expect(width / viewport, `${path} uses too little of the screen`).toBeGreaterThan(0.9);
+      expect(width, `${path} should leave a gutter`).toBeLessThan(viewport);
     });
   }
 
@@ -276,6 +282,35 @@ test.describe("wide screens", () => {
       );
       expect(tooWide.map((r) => `${r.chars}ch "${r.text}"`), path).toStrictEqual([]);
     }
+  });
+
+  test("scales with the viewport instead of locking to one size", async ({ page }) => {
+    const widths: Record<number, number> = {};
+    for (const vw of [1280, 1600, 1920, 2560]) {
+      await page.setViewportSize({ width: vw, height: 1000 });
+      await page.goto("/topics");
+      widths[vw] = await page.evaluate(
+        () => document.querySelector(".topics-index")!.getBoundingClientRect().width,
+      );
+    }
+    // Below the ceiling every size gets the same share, so no single display is
+    // the one the stylesheet was written for.
+    for (const vw of [1280, 1600, 1920]) {
+      expect(widths[vw] / vw, `at ${vw}px`).toBeGreaterThan(0.9);
+    }
+    // And it still grows past the point where the ceiling takes over.
+    expect(widths[2560]).toBeGreaterThan(widths[1920]);
+    expect(widths[1920]).toBeGreaterThan(widths[1600]);
+    expect(widths[1600]).toBeGreaterThan(widths[1280]);
+  });
+
+  test("stops widening once a line of nav would span the desk", async ({ page }) => {
+    await page.setViewportSize({ width: 3840, height: 1200 });
+    await page.goto("/topics");
+    const width = await page.evaluate(
+      () => document.querySelector(".topics-index")!.getBoundingClientRect().width,
+    );
+    expect(width).toBeLessThanOrEqual(2200);
   });
 
   /**
@@ -301,4 +336,47 @@ test.describe("wide screens", () => {
     });
     expect(sideBySide, "overview and lesson list should sit side by side").toBe(true);
   });
+});
+
+/**
+ * The other end of the same rule. A layout built from shares of the screen has
+ * to survive the narrow end too, and the things that broke it there were fixed
+ * widths that could not give way: a nav row that would not wrap and a select
+ * with a 242px floor. Nothing should push the page wider than the phone.
+ */
+test.describe("narrow screens", () => {
+  const paths = ["/", "/matrix", "/topics", "/problems", "/problems/two-sum-indices",
+                 "/topics/lin_reg", "/topics/lin_reg/ols-fit", "/review", "/settings"];
+
+  for (const width of [360, 414]) {
+    test(`fits the viewport at ${width}px with nothing to scroll sideways`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      const overflowing: string[] = [];
+      for (const path of paths) {
+        await page.goto(path);
+        const culprits = await page.evaluate(() => {
+          const root = document.documentElement;
+          // A long equation or code line may run past the edge -- it sits in a
+          // box that scrolls on its own. What must not happen is the *page*
+          // scrolling sideways, so that is what decides pass or fail.
+          if (root.scrollWidth <= root.clientWidth + 1) return [];
+          const scrolls = (el: Element) => {
+            for (let n: Element | null = el; n; n = n.parentElement) {
+              const x = getComputedStyle(n).overflowX;
+              if (x === "auto" || x === "scroll") return true;
+            }
+            return false;
+          };
+          // Name the element, not just the number: a bare pixel count says the
+          // page is broken without saying which part did it.
+          return Array.from(root.querySelectorAll("*"))
+            .filter((el) => el.getBoundingClientRect().right > root.clientWidth + 2 && !scrolls(el))
+            .slice(0, 3)
+            .map((el) => `${el.tagName.toLowerCase()}.${el.className?.toString?.().split(" ")[0] ?? ""}`);
+        });
+        if (culprits.length) overflowing.push(`${path}: ${culprits.join(", ")}`);
+      }
+      expect(overflowing).toStrictEqual([]);
+    });
+  }
 });

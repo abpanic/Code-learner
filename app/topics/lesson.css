@@ -1,12 +1,12 @@
 .lesson-shell { min-height: 100vh; background:var(--info-surface); color:var(--ink); }
-.lesson-container { max-width: var(--page-max); margin: auto; padding: 20px clamp(20px,4vw,64px) 90px; }
+.lesson-container { width: var(--page-width); margin: auto; padding: 20px var(--page-gutter) 90px; }
 .lesson-breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color:var(--ink-3); font-size: 12px; }
 .lesson-breadcrumb a { color:var(--brand); }.lesson-breadcrumb a:hover { text-decoration: underline; }
 .lesson-breadcrumb strong { font-weight: 650; color:var(--ink-2); }
 .lesson-heading { margin: 27px 0 30px; border-radius: 17px; background:linear-gradient(110deg,var(--code-bg) 0%,var(--code-bg) 100%); color:var(--code-ink); padding: clamp(24px,4vw,44px); display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; box-shadow: 0 10px 24px rgba(23,48,70,.12); }
 .lesson-heading .eyebrow { color:var(--code-accent); margin-bottom: 8px; }
 .lesson-heading h1 { font-size: clamp(30px,3.2vw,46px); line-height: 1.08; letter-spacing: -.045em; margin: 0; }
-.lesson-heading p:not(.eyebrow) { margin: 13px 0 0; color:var(--code-ink); font-size: 16px; line-height: 1.6; max-width: 680px; }
+.lesson-heading p:not(.eyebrow) { margin: 13px 0 0; color:var(--code-ink); font-size: 16px; line-height: 1.6; max-width: 60ch; }
 .lesson-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 21px; }.lesson-pills span { border:1px solid var(--ink-4); color:var(--code-ink); padding: 4px 9px; border-radius: 100px; font-size: 12px; font-weight: 650; }
 .lesson-heading-actions { display: flex; flex-direction: column; gap: 9px; align-items: flex-start; flex: 0 0 185px; }.lesson-heading-actions > span { color:var(--code-ink-2); font-size: 12px; line-height: 1.4; }
 .lesson-cta { display: inline-flex; align-items: center; justify-content: center; gap: 9px; width: 100%; background:var(--brand-surface); color:var(--ink); padding: 11px 15px; border-radius: 8px; font-size: 14px; font-weight: 800; }.lesson-cta:hover { background:var(--brand-surface); }
