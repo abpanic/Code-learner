@@ -6,7 +6,7 @@ tests. Theory, explanation and "learn more" are **links only**, and every one of
 as the literal token `<placeholder>` until real URLs are chosen.
 
 Audience: whoever picks up this repo next (you, or a collaborator).
-Status: **Phase 0 complete** (branch `phase-0-vercel-migration`). Phase 1 is next.
+Status: **Phases 0 and 1 complete.** Phase 2 (editor + runner) is next.
 
 ---
 
@@ -88,8 +88,8 @@ Routes marked **new** do not exist yet. `(…)` denotes a route group, `[…]` a
 | Route | Type | Purpose | Key components | Data source | Phase |
 |---|---|---|---|---|---|
 | `/` | **replace** | Learner dashboard — the home screen | `StreakCard`, `SolvedByDifficulty`, `TopicHeatmap`, `ReviewQueue`, `ContinueWhereYouLeftOff` | attempts + progress store | 3 |
-| `/problems` | **new** | Sortable, filterable problem list (the LeetCode table) | `ProblemTable`, `ProblemFilters`, `StatusPill` | `data/problems/*` | 1 |
-| `/problems/[slug]` | **new** | The workspace — *this is the product* | `ProblemPane`, `CodeEditor`, `RunBar`, `TestResults`, `PlaceholderLinks` | `data/problems/<slug>` | 1–2 |
+| `/problems` | done | Sortable, filterable problem list (the LeetCode table) | `ProblemTable`, `ProblemFilters`, `StatusPill` | `data/problems/*` | 1 |
+| `/problems/[slug]` | partial | The workspace — *this is the product* | `ProblemPane`, `CodeEditor`, `RunBar`, `TestResults`, `PlaceholderLinks` | `data/problems/<slug>` | 1–2 |
 | `/topics` | **new** | Curriculum view — the 70 topics, each with its problem count | `TopicGrid`, `DomainSection`, `EvidenceSelect` | `data/topics.json` | 3 |
 | `/topics/[id]` | **keep + extend** | Existing six ML lessons; all 70 get a problems list + `<placeholder>` theory links | `LessonShell`, `ProblemsForTopic`, `PlaceholderLinks` | `core-lessons.ts`, problems | 3 |
 | `/matrix` | **move** | Today's tracker UI, relocated off `/` | existing `Tracker` | progress store | 3 |
@@ -290,7 +290,7 @@ deleted far more than it added, as expected.
 all 7 routes plus `/notebooks/*.ipynb`. Remaining: import the repo in Vercel (step 7) — that
 needs your account.
 
-### Phase 1 — Problem infrastructure (est. 3–4 days) ⟵ **start here**
+### Phase 1 — Problem infrastructure ✅ done
 
 1. `data/problems/` + the `Problem` type + a `scripts/build-problem-manifest.mjs` that
    validates every problem (unique slug, known `topicIds`, ≥3 tests, all three `links` keys
@@ -302,10 +302,16 @@ needs your account.
    status, text), URL-synced filter state.
 4. `lib/attempts.ts` + `lib/stats.ts` with unit tests.
 
-**Done when:** the list renders from data, filters survive a reload, and adding a malformed
-problem file fails `pnpm build`.
+**Verified:** 10 problems across 3 topics; `/problems` filters by topic, difficulty, status
+and text with state mirrored to the URL; breaking a `topicId` fails `pnpm build` with exit 1
+and a message naming the problem and field; 78 Vitest tests pass.
 
-### Phase 2 — The workspace (est. 4–5 days)
+Two changes from the plan as written. Validation lives in `data/problems/index.ts` and runs
+at module load rather than in a separate `build-problem-manifest.mjs` — a `.mjs` script
+cannot read the `.ts` problem files without extra tooling, and import-time validation fails
+the build just as hard. The DSA topic id is `dsa_arrays_ptrs`, not `dsa_arrays`.
+
+### Phase 2 — The workspace (est. 4–5 days) ⟵ **start here**
 
 1. CodeMirror 6 + Python/JS modes, tab-size and bracket config, `Cmd/Ctrl+Enter` = Run.
 2. `lib/runner/` per Section 7: worker, protocol, Python harness, JS harness, watchdog.
