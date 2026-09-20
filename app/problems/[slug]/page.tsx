@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import topicData from "@/data/topics.json";
 import { getProblem, problems } from "@/data/problems";
 import { isPlaceholder, visibleTests, type Problem } from "@/data/problems/types";
+import { SiteHeader } from "@/app/site-header";
 import { TopicProgress } from "@/app/topics/topic-progress";
 import { Workspace } from "./workspace";
 import "../../topics/lesson.css";
@@ -68,19 +69,10 @@ export default async function ProblemPage({ params }: { params: Promise<{ slug: 
   const primaryTopic = problem.topicIds[0];
 
   return <main className="problems-shell">
-    <header className="lesson-topbar">
-      <div className="lesson-topbar-inner">
-        <Link href="/" className="lesson-brand">
-          <span className="brand-mark">AI<span className="brand-dot">·</span>ML</span>
-          <span>Competency Matrix</span>
-        </Link>
-        <Link href="/problems" className="lesson-back"><ArrowLeft size={16} /> All problems</Link>
-      </div>
-    </header>
+    <SiteHeader back={{ href: "/problems", label: "All problems" }} />
 
     <div className="problem-detail">
       <nav aria-label="Breadcrumb" className="lesson-breadcrumb">
-        <Link href="/">Skills explorer</Link><span>/</span>
         <Link href="/problems">Problems</Link><span>/</span>
         <strong>{problem.title}</strong>
       </nav>

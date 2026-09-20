@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import topicData from "@/data/topics.json";
+import { SiteHeader } from "@/app/site-header";
 import { problems } from "@/data/problems";
 import { ProblemBrowser, type TopicOption } from "./problem-browser";
 // The shared topbar styles live with the lesson pages for now; Phase 3 pulls
@@ -24,15 +23,7 @@ function topicOptions(): TopicOption[] {
 
 export default function ProblemsPage() {
   return <main className="problems-shell">
-    <header className="lesson-topbar">
-      <div className="lesson-topbar-inner">
-        <Link href="/" className="lesson-brand">
-          <span className="brand-mark">AI<span className="brand-dot">·</span>ML</span>
-          <span>Competency Matrix</span>
-        </Link>
-        <Link href="/" className="lesson-back"><ArrowLeft size={16} /> Skills explorer</Link>
-      </div>
-    </header>
+    <SiteHeader />
     <ProblemBrowser problems={[...problems]} topics={topicOptions()} />
   </main>;
 }
