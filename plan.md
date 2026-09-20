@@ -6,8 +6,8 @@ tests. Theory, explanation and "learn more" are **links only**, and every one of
 as the literal token `<placeholder>` until real URLs are chosen.
 
 Audience: whoever picks up this repo next (you, or a collaborator).
-Status: **Phases 0-3 complete, plus CI.** Phase 4 (accounts, optional) and Phase 5 (polish)
-remain.
+Status: **Phases 0-3 and 5 complete, plus CI.** Only Phase 4 (accounts) remains, and it is
+optional.
 
 ---
 
@@ -58,8 +58,8 @@ the vinext + Vite + Cloudflare Workers layer the project started on.
 > Drizzle was removed as *dead D1 scaffolding*. Phase 4 reintroduces it deliberately
 > against Neon Postgres — that is a different dependency set, not a reversal.
 
-**Still open from the review:** the site is light-mode only, and `topics.json` carries an
-unused `status` field. Tests and CI are now in place.
+**Still open from the review:** `topics.json` carries an unused `status` field. Tests, CI
+and dark mode are now in place.
 
 ---
 
@@ -94,8 +94,8 @@ Routes marked **new** do not exist yet. `(…)` denotes a route group, `[…]` a
 | `/topics` | done | Curriculum view — the 70 topics, each with its problem count | `TopicGrid`, `DomainSection`, `EvidenceSelect` | `data/topics.json` | 3 |
 | `/topics/[id]` | done | Existing six ML lessons; all 70 get a problems list + `<placeholder>` theory links | `LessonShell`, `ProblemsForTopic`, `PlaceholderLinks` | `core-lessons.ts`, problems | 3 |
 | `/matrix` | done | Today's tracker UI, relocated off `/` | existing `Tracker` | progress store | 3 |
-| `/review` | **new** | Spaced-repetition queue: problems due for a re-solve | `ReviewQueue`, `DueCard` | attempts store | 5 |
-| `/settings` | **new** | Import/export progress, reset, editor prefs, theme | `ProgressIO`, `ThemeToggle` | progress store | 5 |
+| `/review` | done | Spaced-repetition queue: problems due for a re-solve | `ReviewQueue`, `DueCard` | attempts store | 5 |
+| `/settings` | done | Import/export progress, reset, editor prefs, theme | `ProgressIO`, `ThemeToggle` | progress store | 5 |
 | `/api/run` | *not built* | Deliberately absent — execution stays client-side (D2) | — | — | — |
 
 **Route moves in Phase 3:** `/` becomes the dashboard and today's tracker moves to
@@ -346,17 +346,26 @@ Added beyond the plan: `app/site-header.tsx`. The topbar was duplicated across t
 which would have made the `/` → `/matrix` move a scattered edit. `/topics/[id]` also covers
 all 64 lesson-less topics, which the plan folded into the `/topics` line.
 
-### Phase 4 — Accounts and durable storage (est. 3–4 days, optional) ⟵ **next, if wanted**
+### Phase 4 — Accounts and durable storage (est. 3–4 days, optional) ⟵ **all that remains**
 
 Only if progress must survive a browser change. Neon Postgres + Drizzle + Auth.js, Route
 Handlers at `/api/attempts` and `/api/progress`, localStorage becomes an offline cache that
 syncs on load. Migration path: on first sign-in, offer to upload the local store.
 
-### Phase 5 — Polish (ongoing)
+### Phase 5 — Polish ✅ done
 
-Dark mode (define the dark palette against the existing `:root` tokens — there is no
-`prefers-color-scheme` block anywhere today), `/review` with SM-2 lite, `/settings`,
-keyboard shortcuts, a11y pass, `status` field dropped from `topics.json`.
+Dark mode, `/review`, `/settings`, keyboard shortcuts and an accessibility pass.
+
+The dark palette was not a matter of adding a media query: the CSS held 264 ad-hoc hex
+values, so it first needed a ~30 token semantic layer. The replacement was property-aware,
+since the same hex means different things as text, as a background and as a border.
+
+**Verified** by a contrast audit that walks every text node on nine pages in both themes and
+holds it to WCAG AA. It found three real defects — `--ink-4` and `--brand-2` were already
+below AA in the *light* theme before any of this work, and the tokenizer had put a dark teal
+on the dark lesson hero at 2.6:1.
+
+Still outstanding from the original review: the unused `status` field in `topics.json`.
 
 ---
 
