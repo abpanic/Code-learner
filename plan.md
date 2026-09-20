@@ -9,6 +9,8 @@ page.
 
 Audience: whoever writes the lessons — you, or anyone you bring in.
 
+Status: **C0 complete.** `lin_reg` is the worked example of the model; C1 is next.
+
 ---
 
 ## 1. The problem with what exists
@@ -187,7 +189,7 @@ will…"). Hedge only where the hedge is real.
 
 ## 7. Phases
 
-### Phase C0 — Model, routes, validation (2–3 days)
+### Phase C0 — Model, routes, validation ✅ done
 
 1. `data/lessons/types.ts` and a validating `index.ts` per §4.
 2. `/topics/[id]/[subtopic]` route on the existing lesson shell.
@@ -199,16 +201,25 @@ will…"). Hedge only where the hedge is real.
    subdivide usefully.
 5. Unit tests for the validators; an e2e test for map → lesson → next lesson.
 
-**Done when** a fixture topic with two sub-topics renders end to end, and a 1,000-word
-sub-topic fails `pnpm build` with a message naming it.
+**Verified.** `lin_reg` was migrated as the proof rather than a throwaway fixture: one
+850-word page covering five ideas is now a 235-word map plus four lessons of 337–456 words.
+Padding one past the limit fails `pnpm build` with exit 1 and
+`lin_reg/ols-fit: 975 words exceeds the 900-word limit — split it`.
 
-### Phase C1 — Migrate the six Core ML topics (3–4 days)
+Three rules changed while writing that first lesson, each because validation rejected its own
+author: the overview minimum caught a 119-word map, the "and" rule caught three lazy
+summaries, and the minute estimate had to start charging for display maths, which is reading
+load without being words. The word *limit* still ignores maths on purpose — counting it would
+push authors to write less explanation around their formulas.
 
-Split the existing six into ~24 sub-topics per §2, moving the prose across rather than
-rewriting it, then filling the gaps the split exposes. Delete the six bespoke route folders.
+### Phase C1 — Migrate the remaining five Core ML topics (3–4 days) ⟵ **start here**
 
-**Done when** all six render as maps, all ~24 sub-topic pages pass validation, and the
-dashboard's lesson counts reflect sub-topics.
+`lin_reg` is done. Split the other five into ~20 sub-topics per §2, moving the prose across
+rather than rewriting it, then filling the gaps the split exposes. Delete their bespoke route
+folders and `data/core-lessons.ts` with them; `app/topics/core-lesson.tsx` goes too.
+
+**Done when** all six render as maps, all ~24 sub-topic pages pass validation, and no topic
+route is hand-written any more.
 
 This phase also settles whether the model is right. Adjust §3 and §4 here if it is not —
 cheaply, before 200 pages depend on them.
