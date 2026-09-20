@@ -1,7 +1,6 @@
-allowBuilds:
-  unrs-resolver: set this to true or false
 # pnpm 11 reads settings from here rather than the "pnpm" field in package.json.
-# unrs-resolver ships a native binding that eslint-config-next's import resolver
-# needs, so its install script has to be allowed to run.
-onlyBuiltDependencies:
-  - unrs-resolver
+# unrs-resolver ships a native binding used by eslint-config-next's import
+# resolver, so its install script has to be allowed to run. Only `pnpm lint`
+# needs it -- `next build` does not run ESLint -- so a deploy is unaffected.
+allowBuilds:
+  unrs-resolver: true
